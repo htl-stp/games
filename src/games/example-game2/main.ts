@@ -11,6 +11,7 @@ class ExampleGame1 extends Game {
             update() {}
             render(renderer: Renderer) {
                 renderer.drawRect(0, 0, renderer.width, renderer.height, "#00ff00")
+                renderer.drawRect(0, 0, 64, 64, "#ffff00")
             }
         }
     }
