@@ -20,4 +20,5 @@ canvas {
   height: 95vh;
   aspect-ratio: 4 / 3;
   background: #000;
+  image-rendering: pixelated;
 }
