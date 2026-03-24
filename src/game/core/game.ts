@@ -1,7 +1,9 @@
+import type {Renderer} from "./renderer.ts";
+
 export class Game {
     private lastTime = 0;
 
-    constructor() {
+    constructor(private renderer: Renderer) {
         this.loop = this.loop.bind(this);
     }
 
@@ -17,7 +19,7 @@ export class Game {
         this.lastTime = now;
 
         this.update(delta)
-        this.draw()
+        this.draw(this.renderer);
 
         requestAnimationFrame(this.loop);
     };
@@ -26,5 +28,5 @@ export class Game {
         console.log(delta)
     }
 
-    draw() {}
+    draw(renderer: Renderer) {}
 }
