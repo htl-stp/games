@@ -24,6 +24,17 @@ export class Renderer {
         );
     }
 
+    drawScreenlines(lineSpacing = 4) {
+        this.ctx.save()
+        this.ctx.fillStyle = "rgba(255,255,255,0.05)"
+
+        for (let y = 0; y < config.canvas_height; y += lineSpacing) {
+            this.ctx.fillRect(0, y, config.canvas_width, 1)
+        }
+
+        this.ctx.restore()
+    }
+
     async loadImage(src: string): Promise<HTMLImageElement> {
         return new Promise((resolve, reject) => {
             if (this.cache.has(src)) {

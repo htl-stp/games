@@ -49,7 +49,7 @@ export abstract class Game {
         this.lastTime = now;
 
         this.update(delta, this._screen, this._input)
-        this.draw(this.renderer, this._screen);
+        this.render(this.renderer, this._screen);
 
         requestAnimationFrame(this.loop);
     };
@@ -58,9 +58,11 @@ export abstract class Game {
         screen.update(delta, input);
     }
 
-    draw(renderer: Renderer, screen: Screen) {
+    private render(renderer: Renderer, screen: Screen) {
         renderer.clear();
 
         screen.render(renderer);
+
+        renderer.drawScreenlines();
     }
 }
