@@ -1,9 +1,10 @@
 import type {Renderer} from "./renderer.ts";
+import type {Screen} from "../screens/screen.ts";
 
 export class Game {
-    private lastTime = 0;
+    private lastTime = Date.now();
 
-    constructor(private renderer: Renderer) {
+    constructor(private renderer: Renderer, private screen: Screen) {
         this.loop = this.loop.bind(this);
     }
 
@@ -15,7 +16,7 @@ export class Game {
         console.log("gameloop")
 
         const now = Date.now();
-        const delta = now - this.lastTime;
+        const delta = (now - this.lastTime) / 1000;
         this.lastTime = now;
 
         this.update(delta)
@@ -25,8 +26,12 @@ export class Game {
     };
 
     update(delta: number) {
-        console.log(delta)
+        this.screen.update(delta);
     }
 
-    draw(renderer: Renderer) {}
+    draw(renderer: Renderer) {
+        this.renderer.clear();
+
+        this.screen.render(renderer);
+    }
 }
