@@ -16,9 +16,13 @@ export class MenuScene extends Scene {
     render(r: Renderer) {
         if (this.img) r.drawImage(this.img, 0, 0, config.canvas_width, config.canvas_height);
 
-        r.advancedText("PRESS    START", config.canvas_width / 2, config.canvas_height / 2, "#fff", {
-            textBaseline: "middle",
-            textAlign: "center",
-        })
+        const visible = Math.floor(performance.now() / 500) % 2 === 0;
+
+        if (visible) {
+            r.advancedText("PRESS    START", config.canvas_width / 2, config.canvas_height / 2, "#fff", {
+                textBaseline: "middle",
+                textAlign: "center",
+            })
+        }
     }
 }

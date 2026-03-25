@@ -4,6 +4,7 @@ import type {Renderer} from "../../engine/core/renderer.ts";
 import {Scene} from "../../engine/scenes/scene.ts";
 import {config} from "../../engine/config.ts";
 import type {Input} from "../../engine/core/input.ts";
+import {MenuScene} from "../../engine/scenes/menuScene.ts";
 
 class Weix extends Entity {
     constructor() {
@@ -162,7 +163,9 @@ export class LinuxWithWeix extends Game {
     constructor() {
         super();
 
-        this.scene = new GameScene()
+        this.scene = new MenuScene(() => {
+            this.scene = new GameScene();
+        })
     }
 
     reset() {
