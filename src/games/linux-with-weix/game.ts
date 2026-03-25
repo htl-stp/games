@@ -1,7 +1,7 @@
 import {Game} from "../../engine/core/game.ts";
 import {Entity} from "../../engine/entity/entity.ts";
 import type {Renderer} from "../../engine/core/renderer.ts";
-import {Screen} from "../../engine/screens/screen.ts";
+import {Scene} from "../../engine/scenes/scene.ts";
 import {config} from "../../engine/config.ts";
 import type {Input} from "../../engine/core/input.ts";
 
@@ -89,7 +89,7 @@ class ScareArea extends Entity {
 
 type GameState = "start" | "running" | "end";
 
-class GameScreen extends Screen {
+class GameScene extends Scene {
     entities: Entity[] = [];
 
     score: number = 0;
@@ -162,10 +162,10 @@ export class LinuxWithWeix extends Game {
     constructor() {
         super();
 
-        this.screen = new GameScreen()
+        this.scene = new GameScene()
     }
 
     reset() {
-        this.screen = new GameScreen()
+        this.scene = new GameScene()
     }
 }

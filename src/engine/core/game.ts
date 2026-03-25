@@ -1,12 +1,12 @@
 import  {type Renderer} from "./renderer.ts";
-import  {type Screen} from "../screens/screen.ts";
+import  {type Scene} from "../scenes/scene.ts";
 import  {type Input} from "./input.ts";
 
 export abstract class Game {
     private lastTime = 0;
     private renderer?: Renderer;
     private _input?: Input;
-    private _screen?: Screen;
+    private _scene?: Scene;
 
     private timeBuffer = 0;
 
@@ -19,13 +19,13 @@ export abstract class Game {
         if (!this._input) throw new Error("Input not found");
         return this._input;
     }
-    get screen(): Screen {
-        if (!this._screen) throw new Error("Screen not found");
-        return this._screen;
+    get scene(): Scene {
+        if (!this._scene) throw new Error("Scene not found");
+        return this._scene;
     }
 
-    set screen(value: Screen) {
-        this._screen = value;
+    set scene(value: Scene) {
+        this._scene = value;
     }
 
 
@@ -43,7 +43,7 @@ export abstract class Game {
 
     loop() {
         if (!this.renderer) throw new Error("Renderer not found");
-        if (!this._screen) throw new Error("Screen not found");
+        if (!this._scene) throw new Error("scene not found");
         if (!this._input) throw new Error("Input not found");
 
         const now = Date.now();
@@ -52,20 +52,20 @@ export abstract class Game {
 
         if (delta > 500) console.error("delta time too high")
 
-        this.update(delta, this._screen, this._input)
-        this.render(this.renderer, this._screen);
+        this.update(delta, this._scene, this._input)
+        this.render(this.renderer, this._scene);
 
         requestAnimationFrame(this.loop);
     };
 
-    update(delta: number, screen: Screen, input: Input) {
-        screen.update(delta, input);
+    update(delta: number, scene: Scene, input: Input) {
+        scene.update(delta, input);
     }
 
-    private render(renderer: Renderer, screen: Screen) {
+    private render(renderer: Renderer, scene: Scene) {
         renderer.clear();
 
-        screen.render(renderer);
+        scene.render(renderer);
 
         renderer.drawScreenlines();
     }

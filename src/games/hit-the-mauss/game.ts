@@ -3,7 +3,7 @@ import type {Renderer} from "../../engine/core/renderer.ts";
 import type {Input} from "../../engine/core/input.ts";
 import {config} from "../../engine/config.ts";
 import {Game} from "../../engine/core/game.ts";
-import {Screen} from "../../engine/screens/screen.ts";
+import {Scene} from "../../engine/scenes/scene.ts";
 
 class Mauss extends Entity {
     private active = false;
@@ -76,7 +76,7 @@ class HitBox extends Entity {
 
 type GameState = "start" | "running" | "end"
 
-class GameScreen extends Screen {
+class GameScene extends Scene {
     entities: Entity[] = [];
     score: number = 0
     gamestate: GameState = "running"
@@ -182,11 +182,11 @@ export class HitTheMauss extends Game {
     constructor() {
         super();
 
-        this.screen = new GameScreen();
+        this.scene = new GameScene();
     }
 
     reset() {
-        this.screen = new GameScreen();
+        this.scene = new GameScene();
     }
 
 }

@@ -1,9 +1,9 @@
-import {Screen} from "./screen.ts";
+import {Scene} from "./scene.ts";
 import type {Renderer} from "../core/renderer.ts";
 import type {Input} from "../core/input.ts";
 import {config} from "../config.ts";
 
-export class MenuScreen extends Screen {
+export class MenuScene extends Scene {
     constructor(private onStart: () => void, private img?: HTMLImageElement) {
         super();
     }
