@@ -67,6 +67,28 @@ export class Renderer {
         this.ctx.fillText(text, x, y);
     }
 
+    advancedText(text: string, x: number, y: number, color: string, conf: {
+        textBaseline?: CanvasTextBaseline;
+        textAlign?: CanvasTextAlign;
+    }) {
+        this.ctx.save();
+
+        this.ctx.font = config.font;
+        this.ctx.fillStyle = color;
+
+        if (conf.textBaseline) {
+            this.ctx.textBaseline = conf.textBaseline;
+        }
+
+        if (conf.textAlign) {
+            this.ctx.textAlign = conf.textAlign;
+        }
+
+        this.ctx.fillText(text, x, y);
+
+        this.ctx.restore();
+    }
+
     getFromCache(src: string) {
         return this.cache.get(src);
     }
