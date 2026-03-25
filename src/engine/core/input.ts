@@ -15,8 +15,10 @@ export class Input {
         });
     }
 
-    isDown(key: string) {
-        return this.keys.has(key);
+    isDown(key: string | string[]) {
+        return Array.isArray(key)
+            ? key.some(k => this.keys.has(k))
+            : this.keys.has(key);
     }
 
     onKeyDown(handler: (key: string) => void) {
