@@ -8,6 +8,8 @@ export abstract class Game {
     private _input?: Input;
     private _screen?: Screen;
 
+    private timeBuffer = 0;
+
     constructor() {
         this.loop = this.loop.bind(this);
     }
@@ -47,6 +49,8 @@ export abstract class Game {
         const now = Date.now();
         const delta = (now - this.lastTime) / 1000;
         this.lastTime = now;
+
+        if (delta > 500) console.error("delta time too high")
 
         this.update(delta, this._screen, this._input)
         this.render(this.renderer, this._screen);
