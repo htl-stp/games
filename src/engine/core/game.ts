@@ -28,6 +28,13 @@ export abstract class Game {
         this._scene = value;
     }
 
+    /**
+     * For loading assets before the game start
+     * Will be awaited in createGamePage
+     *
+     * @see createGamePage
+     */
+    async loadAssets() {}
 
     init(renderer: Renderer, input: Input) {
         this.renderer = renderer;

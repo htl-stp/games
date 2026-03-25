@@ -3,7 +3,7 @@ import {Renderer} from "./core/renderer.ts";
 import {Input} from "./core/input.ts";
 import {config} from "./config.ts";
 
-export function createGamePage(GameClass: new () => Game) {
+export async function createGamePage(GameClass: new () => Game) {
     console.log("test")
 
     const canvas = document.getElementById("gamecanvas") as HTMLCanvasElement;
@@ -15,6 +15,8 @@ export function createGamePage(GameClass: new () => Game) {
     const input = new Input();
 
     const game = new GameClass();
+
+    await game.loadAssets()
 
     game.init(renderer, input)
 
