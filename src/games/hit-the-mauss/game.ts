@@ -1,6 +1,7 @@
 import {Entity} from "../../engine/entity/entity.ts";
 import type {Renderer} from "../../engine/core/renderer.ts";
 import type {Input} from "../../engine/core/input.ts";
+import {config} from "../../engine/config.ts";
 
 class Mauss extends Entity{
     private active = false;
@@ -11,7 +12,7 @@ class Mauss extends Entity{
     render(r:Renderer){
         r.drawRect(this.x,this.y,this.w,this.h,"#a00f05")
     }
-    hit(){
+    getHit(){
         this.active = false;
     }
     peek(){
@@ -27,6 +28,12 @@ class Hammer extends Entity{
     }
     render(r:Renderer){
         r.drawRect(this.x,this.y,this.w,this.h,"#101af1")
+    }
+}
+
+class HitBox extends Entity{
+    constructor(x:number, y:number,w:number,h:number) {
+        super(x,y,w,h);
     }
 }
 type GameState = "start" | "running" | "end"
@@ -56,12 +63,62 @@ class GameScreen extends Screen{
                 e.update(dt)
             }
         }
-        this.handleInput(input)
+        this.handleInput(input, dt)
 
     }
-    handleInput(input:Input){
-        //todo
+    handleInput(input:Input, dt:number){
+        if(input.isDown(" ")){
+            if(this.gamestate === "running"){
+                this.hitMauss()
+            }
+        }
+        if(input.isDown("a")){
+            if(this.gamestate === "running"){
+                this.moveLeft(dt)
+            }
+        }
+        if(input.isDown("d")){
+            if(this.gamestate === "running"){
+                this.moveRight(dt)
+            }
+        }
     }
+
+    hitMauss(){
+        const hammer = this.entities.find(e => e instanceof Hammer)!
+        const hitBox = new HitBox(hammer.x,hammer.y,hammer.w,hammer.h);
+
+        const mausses:Mauss[] = []
+
+        for (const e of this.entities) {
+            if(e instanceof Mauss){
+                mausses.push(e)
+            }
+        }
+
+        for (const m of mausses) {
+            if(hitBox.collidesWith(m)){
+                m.getHit()
+                this.score += 100
+            }
+        }
+    }
+    moveLeft(dt:number){
+        const hammer = this.entities.find(e => e instanceof Hammer)!
+        if(hammer.x < 20){
+            return
+        }
+        hammer.x -= hammer.speed * dt
+    }
+
+    moveRight(dt:number){
+        const hammer = this.entities.find(e => e instanceof Hammer)!
+        if(hammer.x > config.canvas_width){
+            return
+        }
+        hammer.x += hammer.speed * dt
+    }
+
 
 
 }
