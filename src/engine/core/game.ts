@@ -10,7 +10,7 @@ export abstract class Game {
 
     private timeBuffer = 0;
 
-    constructor() {
+    protected constructor() {
         this.loop = this.loop.bind(this);
     }
 
@@ -29,7 +29,7 @@ export abstract class Game {
     }
 
     /**
-     * For loading assets before the game start
+     * For loading assets before the game start.
      * Will be awaited in createGamePage
      *
      * @see createGamePage
@@ -48,7 +48,7 @@ export abstract class Game {
 
     reset() {}
 
-    loop() {
+    private loop() {
         if (!this.renderer) throw new Error("Renderer not found");
         if (!this._scene) throw new Error("scene not found");
         if (!this._input) throw new Error("Input not found");
