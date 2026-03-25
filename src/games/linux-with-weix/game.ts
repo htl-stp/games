@@ -109,14 +109,19 @@ class GameScreen extends Screen {
     }
 
     render(r: Renderer) {
-
+        const currentTime = Math.floor(Date.now() * 3 / 1000);
 
         for (const e of this.entities) {
             e.render(r)
         }
 
         r.text(`Score: ${this.score}`, 10, 20, "#fff")
-        console.log(`Score: ${this.score}`)
+
+        if (this.score === 1000) {
+            if (currentTime % 2) {
+                r.text(`JACKPOT`, config.canvas_width - 65, 20, "#fff")
+            }
+        }
     }
 
     update(dt: number, input: Input) {
