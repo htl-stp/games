@@ -4,6 +4,7 @@ import type {Input} from "../../engine/core/input.ts";
 import {config} from "../../engine/config.ts";
 import {Game} from "../../engine/core/game.ts";
 import {Scene} from "../../engine/scenes/scene.ts";
+import {MenuScene} from "../../engine/scenes/menuScene.ts";
 
 class Mauss extends Entity {
     private active = false;
@@ -245,7 +246,9 @@ export class HitTheMauss extends Game {
     constructor() {
         super();
 
-        this.scene = new GameScene();
+        this.scene = new MenuScene(() => {
+            this.scene = new GameScene();
+        });
     }
 
     reset() {
