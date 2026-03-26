@@ -33,6 +33,8 @@ main .game {
 
 main .game img {
     width: 100%;
+    aspect-ratio: 4/3;
+    background: black;
 }
 
 main .game .author {
