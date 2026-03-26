@@ -5,6 +5,9 @@ import {config} from "../../engine/config.ts";
 import {Game} from "../../engine/core/game.ts";
 import {Scene} from "../../engine/scenes/scene.ts";
 import {MenuScene} from "../../engine/scenes/menuScene.ts";
+import {signal} from "../../engine/utils/signal.ts";
+import {HeartDisplay} from "../../engine/entity/heartDisplay.ts";
+import {ScoreDisplay} from "../../engine/entity/scoreDisplay.ts";
 
 class Mauss extends Entity {
     private active = false;
@@ -86,10 +89,10 @@ class HitBox extends Entity {
 type GameState = "start" | "running" | "end"
 
 class GameScene extends Scene {
-    lives: number = 3;
+    lives = signal<number>(3)
 
     entities: Entity[] = [];
-    score: number = 0
+    score = signal<number>(0)
     gamestate: GameState = "running"
 
     timer: number = 0;
@@ -115,14 +118,15 @@ class GameScene extends Scene {
             const m = new Mauss(x, y);
             this.entities.push(m);
         }
+
+        this.entities.push(new HeartDisplay(this.lives))
+        this.entities.push(new ScoreDisplay(this.score))
     }
 
     render(r: Renderer) {
         for (const e of this.entities) {
             e.render(r)
         }
-        r.text(`Score: ${this.score}`, 10, 20, "#fff")
-        r.text(`Lives: ${this.lives}`, 150, 20, "#fff")
 
         if(this.gamestate === "end"){
             r.advancedText("Game Over", config.canvas_width/2,config.canvas_height/2, "#fff",{textAlign:"center",textBaseline:"middle"})
@@ -149,10 +153,10 @@ class GameScene extends Scene {
                     const result = e.update(dt)
 
                     if (result) {
-                        this.lives--;
+                        this.lives.update(v => v - 1)
                         console.log("Leben verloren")
 
-                        if (this.lives <= 0) {
+                        if (this.lives() <= 0) {
                             console.log("Game Over")
                             this.gamestate = "end"
                         }
@@ -220,7 +224,7 @@ class GameScene extends Scene {
         for (const m of mausses) {
             if (m.isActive() && hitBox.collidesWith(m)) {
                 m.getHit()
-                this.score += 100
+                this.score.update(v => v + 100)
             }
         }
     }
