@@ -13,10 +13,13 @@ export const config = {
             dark_green: "#009900",
             blue: "#00aaff",
             dark_blue: "#0088dd",
+            shadow_blue: "#112233",
             purple: "#aa00ff",
             dark_purple: "#7700da",
             black: "#0a0a0a",
             white: "#fafafa",
+            gray: "#999999",
+            dark_gray: "#333333",
         }
     }
 }

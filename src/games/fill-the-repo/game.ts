@@ -12,10 +12,10 @@ import {signal} from "../../engine/utils/signal.ts";
 type Subject = "POS" | "WMC" | "SYP" | "DBI"
 type Direction = "top" | "right" | "bottom" | "left";
 const SUBJECT_COLORS = {
-    POS: "#4287f5", // Blau
-    WMC: "#42f554", // Grün
-    SYP: "#f5d442", // Gelb
-    DBI: "#a142f5"  // Violett
+    POS: config.theme.colors.blue,
+    WMC: config.theme.colors.green,
+    SYP: config.theme.colors.yellow,
+    DBI: config.theme.colors.purple,
 };
 
 class Cube extends Entity {
@@ -49,7 +49,7 @@ class Cube extends Entity {
     }
 
     render(r: Renderer) {
-        r.drawRect(this.x, this.y, this.w, this.h, "#333333");
+        r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.dark_gray);
 
         r.text(this.sides[0], this.x + 15, this.y + 15, SUBJECT_COLORS[this.sides[0]]);
         r.text(this.sides[1], this.x + 35, this.y + 35, SUBJECT_COLORS[this.sides[1]]);
@@ -113,7 +113,7 @@ class SubjectProjectile extends Entity {
         const color = SUBJECT_COLORS[this.type]
 
         r.drawRect(this.x, this.y, this.w, this.h, color);
-        r.text(this.type, this.x + 2, this.y + 20, "#000000");
+        r.text(this.type, this.x + 2, this.y + 20, config.theme.colors.black);
     }
 }
 
@@ -204,7 +204,7 @@ class GameScene extends Scene {
 
         if (this.state === "end") {
             r.drawRect(0, 0, config.canvas_width, config.canvas_height, "rgba(0,0,0,0.7)");
-            r.advancedText("Game Over", config.canvas_width/2,config.canvas_height/2, "#f00",{textAlign:"center",textBaseline:"middle"});
+            r.advancedText("Game Over", config.canvas_width/2,config.canvas_height/2, config.theme.colors.red,{textAlign:"center",textBaseline:"middle"});
         }
     }
 }

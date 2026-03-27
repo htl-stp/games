@@ -43,9 +43,9 @@ class Mauss extends Entity {
 
     render(r: Renderer) {
         if (!this.active) {
-            r.drawRect(this.x, this.y, this.w, this.h, "#010101")
+            r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.black)
         } else {
-            r.drawRect(this.x, this.y, this.w, this.h, "#a00f05")
+            r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.red)
         }
     }
 
@@ -75,7 +75,7 @@ class Hammer extends Entity {
     }
 
     render(r: Renderer) {
-        r.drawRect(this.x, this.y, this.w, this.h, "#101af1")
+        r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.blue)
     }
 }
 
@@ -128,7 +128,7 @@ class GameScene extends Scene {
         }
 
         if(this.gamestate === "end"){
-            r.advancedText("Game Over", config.canvas_width/2,config.canvas_height/2, "#fff",{textAlign:"center",textBaseline:"middle"})
+            r.advancedText("Game Over", config.canvas_width/2,config.canvas_height/2, config.theme.colors.white,{textAlign:"center",textBaseline:"middle"})
         }
 
     }
