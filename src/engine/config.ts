@@ -2,5 +2,24 @@ export const config = {
     canvas_width: 240,
     canvas_height: 180,
     font: "8px 'Press Start 2P'",
-    fps: 60
+    fps: 60,
+    theme: {
+        colors: {
+            red: "#dd0000",
+            dark_red: "#990000",
+            yellow: "#ffdd00",
+            dark_yellow: "#ccaa00",
+            green: "#00dd00",
+            dark_green: "#009900",
+            blue: "#00aaff",
+            dark_blue: "#0088dd",
+            shadow_blue: "#112233",
+            purple: "#aa00ff",
+            dark_purple: "#7700da",
+            black: "#0a0a0a",
+            white: "#fafafa",
+            gray: "#999999",
+            dark_gray: "#333333",
+        }
+    }
 }

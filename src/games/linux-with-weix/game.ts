@@ -16,7 +16,7 @@ class Weix extends Entity {
     }
 
     render(r: Renderer) {
-        r.drawRect(this.x, this.y, this.w, this.h, "#00aaff")
+        r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.blue)
     }
 }
 
@@ -73,7 +73,7 @@ class Student extends Entity {
     }
 
     render(r: Renderer) {
-        const color = this.scared ? "#663399" : "#ff0000"
+        const color = this.scared ? config.theme.colors.dark_purple : config.theme.colors.red;
 
         r.drawRect(this.x, this.y, this.w, this.h, color)
     }
@@ -87,7 +87,7 @@ class ScareArea extends Entity {
     }
 
     render(r: Renderer) {
-        r.drawRect(this.x, this.y, this.w, this.h, "#113")
+        r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.shadow_blue)
     }
 }
 
@@ -123,7 +123,7 @@ class GameScene extends Scene {
 
         if (this.score() === 1000) {
             if (currentTime % 2) {
-                r.text(`JACKPOT`, config.canvas_width - 65, 20, "#fff")
+                r.text(`JACKPOT`, config.canvas_width - 65, 20, config.theme.colors.white)
             }
         }
     }
