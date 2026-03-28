@@ -20,7 +20,7 @@ class Table extends Entity {
         const color = this.status === "locked" ? config.theme.colors.green : config.theme.colors.blue;
 
         r.drawRect(this.x,this.y,this.w,this.h,color)
-        r.advancedText(this.id.toString(),this.x, this.y, config.theme.colors.white,
+        r.advancedText(this.id.toString(),this.x +  this.w / 2, this.y + this.h / 2, config.theme.colors.white,
             {textAlign : "center", textBaseline : "middle"})
     }
 
@@ -38,13 +38,13 @@ class HomeSlot extends Entity {
         const spacing = config.canvas_width / 5
         const x = (index*spacing) + (spacing / 2) - 30
         const y = 20
-        super(x,y,60,40)
+        super(x,y,40,20)
         this.tableId = id
     }
     render(r: Renderer) {
 
         r.drawRect(this.x,this.y,this.w,this.h, "rgba(255,255,255,0.2)")
-        r.advancedText(this.tableId.toString(),this.x,this.y,config.theme.colors.black,{textAlign:"center",textBaseline:"middle"})
+        r.advancedText(this.tableId.toString(),this.x +  this.w / 2,this.y + this.y / 2,config.theme.colors.black,{textAlign:"center",textBaseline:"middle"})
     }
 }
 
@@ -116,7 +116,7 @@ class GameScene extends Scene {
             table.reset()
 
             const rx = Math.random() * (config.canvas_width - table.w);
-            const ry = 150 + Math.random() * (config.canvas_height - table.h - 150);
+            const ry = 40 + Math.random() * (config.canvas_height - table.h - 40);
 
             this.targets.push(new Target(table.id,rx,ry,table.w,table.h));
         })
@@ -178,18 +178,14 @@ class GameScene extends Scene {
         const timeText = `TIME: ${Math.max(0, this.currentTime).toFixed(1)}s`;
         const timeColor = this.currentTime < 5 ? config.theme.colors.red : config.theme.colors.white;
 
-        // Zeit oben links anzeigen
         r.advancedText(timeText, 20, 80, timeColor, {
             textAlign: "left",
             textBaseline: "top"
         });
 
-        // 5. Game Over Screen
         if (this.state === "end") {
-            // Dunkler Overlay-Schleier über das ganze Bild
             r.drawRect(0, 0, config.canvas_width, config.canvas_height, "rgba(0, 0, 0, 0.85)");
 
-            // Zentrierter "Game Over" Text
             r.advancedText(
                 "GAME OVER",
                 config.canvas_width / 2,
@@ -198,14 +194,7 @@ class GameScene extends Scene {
                 { textAlign: "center", textBaseline: "middle" }
             );
 
-            // Neustart-Hinweis
-            r.advancedText(
-                "Press SPACE to Restart",
-                config.canvas_width / 2,
-                config.canvas_height / 2 + 40,
-                config.theme.colors.white,
-                { textAlign: "center", textBaseline: "middle" }
-            );
+
         }
     }
 }
