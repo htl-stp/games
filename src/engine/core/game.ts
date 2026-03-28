@@ -1,6 +1,7 @@
 import  {type Renderer} from "./renderer.ts";
 import  {type Scene} from "../scenes/scene.ts";
 import  {type Input} from "./input.ts";
+import type {AssetLoader} from "../assets/assetloader.ts";
 
 export abstract class Game {
     private lastTime = 0;
@@ -29,12 +30,19 @@ export abstract class Game {
     }
 
     /**
-     * For loading assets before the game start.
-     * Will be awaited in createGamePage
+     * For adding assets that will be loaded before the game starts.
+     *
+     * Loading happens in `createGamePage`
+     *
+     * @example
+     * loadAssets(loader: AssetLoader): void {
+     *     loader.add(new SoundAsset("assets/sound.mp3"))
+     *     loader.add(new ImageAsset("assets/image.jpg"))
+     * }
      *
      * @see createGamePage
      */
-    async loadAssets(renderer: Renderer): Promise<void> {}
+    loadAssets(loader: AssetLoader): void {}
 
     init(renderer: Renderer, input: Input) {
         this.renderer = renderer;

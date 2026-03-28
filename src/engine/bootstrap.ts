@@ -2,6 +2,7 @@ import type {Game} from "./core/game.ts";
 import {Renderer} from "./core/renderer.ts";
 import {Input} from "./core/input.ts";
 import {config} from "./config.ts";
+import {AssetLoader} from "./assets/assetloader.ts";
 
 export async function createGamePage(GameClass: new () => Game) {
     console.log("test")
@@ -16,7 +17,11 @@ export async function createGamePage(GameClass: new () => Game) {
 
     const game = new GameClass();
 
-    await game.loadAssets(renderer);
+    const assetLoader = new AssetLoader();
+
+    game.loadAssets(assetLoader);
+
+    await assetLoader.loadAll()
 
     game.init(renderer, input)
 
