@@ -1,0 +1,24 @@
+---
+import GameLayout from '../../layouts/GameLayout.astro';
+import games from '../../assets/games.json';
+
+export function getStaticPaths() {
+    return games.map(({name,internal}) => ({
+        params: { slug: internal },
+        props: { title: name }
+    }))
+}
+
+const { slug } = Astro.params;
+const { title } = Astro.props;
+---
+<GameLayout title={title}>
+    <canvas id="gamecanvas" data-slug={slug}></canvas>
+    <script>
+        const games = import.meta.glob('../../games/*/main.ts');
+        const slug = document.getElementById('gamecanvas')?.dataset.slug;
+
+        const loader = games[`../../games/${slug}/main.ts`];
+        loader?.();
+    </script>
+</GameLayout>

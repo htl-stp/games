@@ -1,0 +1,17 @@
+---
+import games from '@assets/games.json'
+
+import GameCard from '../components/GameCard.astro'
+
+import '@htl-stp/core/core.css';
+import '@htl-stp/core/utilities.css';
+import '@htl-stp/core/components.css';
+import '../styles/style.css'
+---
+<h1 class="text-center heading-xl">HTL Arcade</h1>
+
+<main class="section container grid grid-3">
+    {games.map(g => (
+        <GameCard game={g}></GameCard>
+    ))}
+</main>

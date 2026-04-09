@@ -6,7 +6,13 @@ import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
 	{
-		ignores: ['**/.angular/**', '**/node_modules/**', '**/dist/**', '**/.idea/**'],
+		ignores: [
+			'**/.angular/**',
+			'**/node_modules/**',
+			'**/dist/**',
+			'**/.idea/**',
+			'**/.astro/**',
+		],
 	},
 	tseslint.configs.recommended,
 	{

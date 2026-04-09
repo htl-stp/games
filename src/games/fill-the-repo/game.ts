@@ -1,13 +1,13 @@
-import { Entity } from '../../engine/entity/entity.ts';
-import { config } from '../../engine/config.ts';
-import type { Renderer } from '../../engine/core/renderer.ts';
-import { Scene } from '../../engine/scenes/scene.ts';
-import type { Input } from '../../engine/core/input.ts';
-import { Game } from '../../engine/core/game.ts';
-import { MenuScene } from '../../engine/scenes/menuScene.ts';
-import { ScoreDisplay } from '../../engine/entity/scoreDisplay.ts';
-import { HeartDisplay } from '../../engine/entity/heartDisplay.ts';
-import { signal } from '../../engine/utils/signal.ts';
+import { Entity } from '@engine/entity/entity.ts';
+import { config } from '@engine/config.ts';
+import type { Renderer } from '@engine/core/renderer.ts';
+import { Scene } from '@engine/scenes/scene.ts';
+import type { Input } from '@engine/core/input.ts';
+import { Game } from '@engine/core/game.ts';
+import { MenuScene } from '@engine/scenes/menuScene.ts';
+import { ScoreDisplay } from '@engine/entity/scoreDisplay.ts';
+import { HeartDisplay } from '@engine/entity/heartDisplay.ts';
+import { signal } from '@engine/utils/signal.ts';
 
 type Subject = 'POS' | 'WMC' | 'SYP' | 'DBI';
 type Direction = 'top' | 'right' | 'bottom' | 'left';

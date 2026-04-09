@@ -1,12 +1,11 @@
 {
-  "name": "game-template",
+  "name": "arcade",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "dev": "astro dev",
+    "build": "tsc && astro build",
     "lint": "prettier -c . && eslint",
     "lint:fix": "prettier -w . && eslint --fix"
   },
@@ -14,10 +13,11 @@
     "@eslint/css": "^1.0.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.2",
+    "astro": "^6.1.5",
     "eslint": "^10.0.3",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
-    "vite": "^8.0.1"
+    "vite": "^7.0.0"
   },
   "dependencies": {
     "@htl-stp/core": "^1.1.0",
