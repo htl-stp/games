@@ -41,14 +41,14 @@ class Cube extends Entity {
 
 	getSubjectAt(direction: Direction): Subject {
 		switch (direction) {
-		case 'top':
-			return this.sides[0];
-		case 'right':
-			return this.sides[1];
-		case 'bottom':
-			return this.sides[2];
-		case 'left':
-			return this.sides[3];
+			case 'top':
+				return this.sides[0];
+			case 'right':
+				return this.sides[1];
+			case 'bottom':
+				return this.sides[2];
+			case 'left':
+				return this.sides[3];
 		}
 	}
 
@@ -73,22 +73,22 @@ class SubjectProjectile extends Entity {
 		const size = 30;
 
 		switch (originDir) {
-		case 'top':
-			startX = config.canvas_width / 2 - size / 2;
-			startY = -size;
-			break;
-		case 'right':
-			startX = config.canvas_width;
-			startY = config.canvas_height / 2 - size / 2;
-			break;
-		case 'bottom':
-			startX = config.canvas_width / 2 - size / 2;
-			startY = config.canvas_height;
-			break;
-		case 'left':
-			startX = -size;
-			startY = config.canvas_height / 2 - size / 2;
-			break;
+			case 'top':
+				startX = config.canvas_width / 2 - size / 2;
+				startY = -size;
+				break;
+			case 'right':
+				startX = config.canvas_width;
+				startY = config.canvas_height / 2 - size / 2;
+				break;
+			case 'bottom':
+				startX = config.canvas_width / 2 - size / 2;
+				startY = config.canvas_height;
+				break;
+			case 'left':
+				startX = -size;
+				startY = config.canvas_height / 2 - size / 2;
+				break;
 		}
 		super(startX, startY, size, size);
 		this.type = type;
@@ -97,18 +97,18 @@ class SubjectProjectile extends Entity {
 
 	update(dt: number) {
 		switch (this.originDir) {
-		case 'top':
-			this.y += this.speed * dt;
-			break;
-		case 'right':
-			this.x -= this.speed * dt;
-			break;
-		case 'bottom':
-			this.y -= this.speed * dt;
-			break;
-		case 'left':
-			this.x += this.speed * dt;
-			break;
+			case 'top':
+				this.y += this.speed * dt;
+				break;
+			case 'right':
+				this.x -= this.speed * dt;
+				break;
+			case 'bottom':
+				this.y -= this.speed * dt;
+				break;
+			case 'left':
+				this.x += this.speed * dt;
+				break;
 		}
 	}
 

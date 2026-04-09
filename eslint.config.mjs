@@ -26,7 +26,7 @@ export default defineConfig([
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/consistent-type-imports': 'error',
 			semi: ['error', 'always'],
-			quotes: ['error', 'single'],
+			quotes: ['error', 'single', { avoidEscape: true }],
 
 			'no-unused-vars': ['off'],
 			'@typescript-eslint/no-unused-vars': ['off'],
@@ -39,7 +39,7 @@ export default defineConfig([
 			'prefer-promise-reject-errors': 'error',
 			'no-async-promise-executor': 'error',
 
-			indent: ['error', 'tab'],
+			indent: ['error', 'tab', { SwitchCase: 1 }],
 		},
 	},
 	{ files: ['**/*.css'], plugins: { css }, language: 'css/css', extends: ['css/recommended'] },
