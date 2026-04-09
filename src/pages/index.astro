@@ -2,17 +2,16 @@
 import GameLayout from '../layouts/GameLayout.astro';
 
 const games = [
-    { slug: 'hit-the-mauss', title: 'Hit the Mauss' },
-    { slug: 'fill-the-repo', title: 'Fill the Repo' },
-    { slug: 'linux-with-weix', title: 'Linux with Weix' },
-    { slug: 'running-with-haeusler', title: 'Running with Haeusler' },
-    { slug: 'test-the-tables', title: 'Test the Tables' },
+    {slug: 'hit-the-mauss', title: 'Hit the Mauss'},
+    {slug: 'fill-the-repo', title: 'Fill the Repo'},
+    {slug: 'linux-with-weix', title: 'Linux with Weix'},
+    {slug: 'running-with-haeusler', title: 'Running with Haeusler'},
+    {slug: 'test-the-tables', title: 'Test the Tables'},
 ];
 ---
-<GameLayout title="Games">
-    <ul>
-        {games.map(g => (
-                <li><a href={`/games/${g.slug}`}>{g.title}</a></li>
-        ))}
-    </ul>
-</GameLayout>
+
+<ul>
+    {games.map(g => (
+            <li><a href={`/games/${g.slug}`}>{g.title}</a></li>
+    ))}
+</ul>

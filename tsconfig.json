@@ -19,7 +19,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@engine/*": ["src/engine/*"]
+      "@engine/*": ["src/engine/*"],
+      "@assets/*": ["src/assets/*"],
+      "@games/*": ["src/games/*"]
     }
   },
   "include": ["src"]

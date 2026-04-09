@@ -1,17 +1,16 @@
-import { Entity } from '../../engine/entity/entity.ts';
-import { config } from '../../engine/config.ts';
-import { type Renderer } from '../../engine/core/renderer.ts';
-import { Scene } from '../../engine/scenes/scene.ts';
-import type { Input } from '../../engine/core/input.ts';
-import { Game } from '../../engine/core/game.ts';
-import { MenuScene } from '../../engine/scenes/menuScene.ts';
-import { signal } from '../../engine/utils/signal.ts';
-import { ScoreDisplay } from '../../engine/entity/scoreDisplay.ts';
-import { HeartDisplay } from '../../engine/entity/heartDisplay.ts';
-import type { AssetLoader } from '../../engine/assets/assetloader.ts';
-import { type Asset, ImageAsset, SoundAsset } from '../../engine/assets/asset.ts';
-import table from '../../../public/assets/images/table.png';
-import table_dance from '../../../public/assets/sounds/songs/table_dance.wav';
+import { Entity } from '@engine/entity/entity.ts';
+import { config } from '@engine/config.ts';
+import { type Renderer } from '@engine/core/renderer.ts';
+import { Scene } from '@engine/scenes/scene.ts';
+import type { Input } from '@engine/core/input.ts';
+import { Game } from '@engine/core/game.ts';
+import { MenuScene } from '@engine/scenes/menuScene.ts';
+import { signal } from '@engine/utils/signal.ts';
+import { ScoreDisplay } from '@engine/entity/scoreDisplay.ts';
+import type { AssetLoader } from '@engine/assets/assetloader.ts';
+import { ImageAsset, SoundAsset } from '@engine/assets/asset.ts';
+import table from '@assets/images/table.png?url';
+import table_dance from '@assets/sounds/songs/table_dance.wav?url';
 
 type TableStatus = 'home' | 'moving' | 'locked';
 
