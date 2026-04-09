@@ -120,159 +120,167 @@ class Target extends Entity {
 type GameState = 'start' | 'running' | 'end';
 
 class GameScene extends Scene {
-    private state:GameState = "running";
+	private state: GameState = 'running';
 
-    private slots:HomeSlot[] = []
-    private tables:Table[] = []
-    private targets:Target[] = [];
+	private slots: HomeSlot[] = [];
+	private tables: Table[] = [];
+	private targets: Target[] = [];
 
-    private activeTableIndex: number = 0;
-    private transitionTimer:number = 0;
+	private activeTableIndex: number = 0;
+	private transitionTimer: number = 0;
 
-    private levelTime:number = 15.0
-    private currentTime:number = 15.0;
+	private levelTime: number = 15.0;
+	private currentTime: number = 15.0;
 
-    private score = signal(0);
-    private scoreDisplay = new ScoreDisplay(this.score);
+	private score = signal(0);
+	private scoreDisplay = new ScoreDisplay(this.score);
 
+	constructor(private input: Input) {
+		super();
+		tableDanceAsset.play();
 
-    constructor(private input:Input) {
-        super();
-        tableDanceAsset.play()
+		for (let i = 1; i <= 5; i++) {
+			const slot = new HomeSlot(i, i - 1);
+			this.slots.push(slot);
+			this.tables.push(new Table(i, slot));
+		}
+		input.onKeyDown((key) => {
+			if (this.state !== 'running') {return;}
 
-        for (let i = 1; i <= 5; i++) {
-            const slot = new HomeSlot(i,i-1)
-            this.slots.push(slot)
-            this.tables.push(new Table(i,slot))
-        }
-        input.onKeyDown(key => {
-            if (this.state !== "running") return
+			const val = parseInt(key);
+			if (val >= 1 && val <= 5) {
+				this.activeTableIndex = val - 1;
+			}
+		});
+		this.startNewRound();
+	}
+	private startNewRound() {
+		this.targets = [];
+		this.activeTableIndex = -1;
+		this.state = 'running';
+		this.currentTime = this.levelTime;
+		this.tables.forEach((table) => {
+			table.reset();
 
-            const val = parseInt(key)
-            if (val >= 1 && val <= 5){
-                this.activeTableIndex = val -1
-            }
-        })
-        this.startNewRound();
-    }
-    private startNewRound() {
-        this.targets = []
-        this.activeTableIndex = -1
-        this.state = "running"
-        this.currentTime = this.levelTime
-        this.tables.forEach(table => {
-            table.reset()
+			let target: Target;
+			let rx: number;
+			let ry: number;
+			let attempts = 0;
 
-            let target: Target;
-            let rx: number;
-            let ry: number;
-            let attempts = 0;
+			do {
+				const rx = Math.random() * (config.canvas_width - table.w);
+				const ry = 40 + Math.random() * (config.canvas_height - table.h - 40);
 
-            do {
-                const rx = Math.random() * (config.canvas_width - table.w);
-                const ry = 40 + Math.random() * (config.canvas_height - table.h - 40);
+				target = new Target(table.id, rx, ry, table.w, table.h);
 
-                target = new Target(table.id, rx, ry, table.w, table.h);
+				attempts++;
 
-                attempts++;
+				if (attempts > 100) {break;}
+			} while (this.targets.some((t) => target.collidesWith(t)));
 
-                if (attempts > 100) break;
-            } while (this.targets.some(t => target.collidesWith(t)));
+			this.targets.push(target);
+		});
+	}
+	update(dt: number, input: Input) {
+		if (this.state === 'end') {return;}
 
-            this.targets.push(target);
-        })
-    }
-    update(dt:number,input:Input) {
-        if (this.state === "end") return
+		this.currentTime -= dt;
+		if (this.currentTime <= 0) {
+			tableDanceAsset.stop();
+			this.state = 'end';
+			return;
+		}
+		if (this.activeTableIndex !== -1) {
+			const t = this.tables[this.activeTableIndex];
+			const target = this.targets[this.activeTableIndex];
 
-        this.currentTime -= dt;
-        if (this.currentTime <= 0) {
-            tableDanceAsset.stop()
-            this.state = "end"
-            return;
-        }
-        if(this.activeTableIndex !== -1){
-        const t = this.tables[this.activeTableIndex];
-        const target = this.targets[this.activeTableIndex];
+			if (t.status !== 'locked') {
+				const speed = 400 * dt;
 
-        if(t.status !== "locked") {
-            const speed = 400 * dt
+				if (input.isDown(config.keys.up)) {
+					if (t.y - speed >= 20 + t.h) {
+						t.y -= speed;
+					}
+				}
 
-            if (input.isDown(config.keys.up)) {
-                if (t.y - speed >= 20 + t.h) {
-                    t.y -= speed;
-                }
-            }
+				if (input.isDown(config.keys.down)) {
+					if (t.y + t.h + speed <= config.canvas_height) {
+						t.y += speed;
+					}
+				}
 
-            if (input.isDown(config.keys.down)) {
-                if (t.y + t.h + speed <= config.canvas_height) {
-                    t.y += speed;
-                }
-            }
+				if (input.isDown(config.keys.left)) {
+					if (t.x - speed >= 0) {
+						t.x -= speed;
+					}
+				}
 
-            if (input.isDown(config.keys.left)) {
-                if (t.x - speed >= 0) {
-                    t.x -= speed;
-                }
-            }
+				if (input.isDown(config.keys.right)) {
+					if (t.x + t.w + speed <= config.canvas_width) {
+						t.x += speed;
+					}
+				}
 
-            if (input.isDown(config.keys.right)) {
-                if (t.x + t.w + speed <= config.canvas_width) {
-                    t.x += speed;
-                }
-            }
+				if (
+					input.isDown(config.keys.left) ||
+					input.isDown(config.keys.down) ||
+					input.isDown(config.keys.left) ||
+					input.isDown(config.keys.right)
+				) {
+					t.status = 'moving';
+				}
 
-            if (input.isDown(config.keys.left) || (input.isDown(config.keys.down)) || (input.isDown(config.keys.left)) || (input.isDown(config.keys.right))) {
-                t.status = "moving"
-            }
+				if (target.checkSnap(t)) {
+					this.activeTableIndex = -1;
+					this.score.update((v) => v + 100);
+					if (this.tables.every((table) => table.status === 'locked')) {
+						this.levelTime = Math.max(3, this.levelTime * 0.9);
+						this.startNewRound();
+					}
+				}
+			}
+		}
+	}
+	render(r: Renderer) {
+		this.slots.forEach((slot) => slot.render(r));
 
-            if (target.checkSnap(t)) {
-                this.activeTableIndex = -1;
-                this.score.update(v => v + 100)
-                if (this.tables.every(table => table.status === "locked")){
-                    this.levelTime = Math.max(3,this.levelTime * 0.9)
-                    this.startNewRound()
-                }
-            }
-        }
-        }
+		this.targets.forEach((target) => target.render(r));
 
-    }
-    render(r: Renderer) {
-        this.slots.forEach(slot => slot.render(r));
+		this.tables.forEach((table, index) => {
+			if (index === this.activeTableIndex) {
+				r.drawRect(
+					table.x - 2,
+					table.y - 2,
+					table.w + 4,
+					table.h + 4,
+					config.theme.colors.white,
+				);
+			}
+			table.render(r);
+		});
 
-        this.targets.forEach(target => target.render(r));
+		const timeText = `TIME: ${Math.max(0, this.currentTime).toFixed(1)}s`;
+		const timeColor =
+			this.currentTime < 5 ? config.theme.colors.red : config.theme.colors.white;
+		this.scoreDisplay.render(r);
 
-        this.tables.forEach((table, index) => {
-            if (index === this.activeTableIndex) {
-                r.drawRect(table.x - 2, table.y - 2, table.w + 4, table.h + 4, config.theme.colors.white);
-            }
-            table.render(r);
-        });
+		r.advancedText(timeText, 150, 7, timeColor, {
+			textAlign: 'left',
+			textBaseline: 'top',
+		});
 
-        const timeText = `TIME: ${Math.max(0, this.currentTime).toFixed(1)}s`;
-        const timeColor = this.currentTime < 5 ? config.theme.colors.red : config.theme.colors.white;
-        this.scoreDisplay.render(r);
+		if (this.state === 'end') {
+			r.drawRect(0, 0, config.canvas_width, config.canvas_height, 'rgba(0, 0, 0, 0.85)');
 
-        r.advancedText(timeText, 150, 7, timeColor, {
-            textAlign: "left",
-            textBaseline: "top"
-        });
-
-        if (this.state === "end") {
-            r.drawRect(0, 0, config.canvas_width, config.canvas_height, "rgba(0, 0, 0, 0.85)");
-
-            r.advancedText(
-                "GAME OVER",
-                config.canvas_width / 2,
-                config.canvas_height / 2 - 20,
-                config.theme.colors.red,
-                { textAlign: "center", textBaseline: "middle" }
-            );
-
-
-        }
-    }
+			r.advancedText(
+				'GAME OVER',
+				config.canvas_width / 2,
+				config.canvas_height / 2 - 20,
+				config.theme.colors.red,
+				{ textAlign: 'center', textBaseline: 'middle' },
+			);
+		}
+	}
 }
 
 const tableAsset = new ImageAsset(table);
