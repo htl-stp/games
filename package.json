@@ -18,7 +18,7 @@
     "eslint": "^10.0.3",
     "prettier": "^3.8.1",
     "typescript": "~5.9.3",
-    "vite": "^8.0.1"
+    "vite": "^7.0.0"
   },
   "dependencies": {
     "@htl-stp/core": "^1.1.0",

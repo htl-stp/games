@@ -1,0 +1,34 @@
+---
+
+import type {GameConfig} from "../utils/types.ts";
+interface Props {
+    game: GameConfig
+}
+
+const {game} = Astro.props;
+
+const thumbnails = import.meta.glob(`../assets/images/thumbnails/*.png`, { eager: true });
+
+const slugToThumbnail: Record<string, string> = {};
+for (const [path, mod] of Object.entries(thumbnails)) {
+    const match = path.match(/.*thumbnails\/(.+)\.png$/);
+    if (match) slugToThumbnail[match[1]] = (mod as { default: string }).default.src;
+}
+
+const thumbnailUrl = slugToThumbnail[game.internal] ?? '/fallback.png';
+console.log(thumbnailUrl);
+---
+<div class="game card">
+    <a href={`./game/${game.internal}`}>
+        <img src={thumbnailUrl} alt="Game Image">
+    </a>
+
+    <h1>
+        <a href={`./game/${game.internal}`} class="heading-lg">
+            {game.name}
+        </a>
+    </h1>
+
+    <p class="mt-md mb-sm">{game.description}</p>
+    <p class="author text-muted">by {game.author}</p>
+</div>

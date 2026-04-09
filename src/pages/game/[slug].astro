@@ -1,14 +1,12 @@
 ---
 import GameLayout from '../../layouts/GameLayout.astro';
+import games from '../../assets/games.json';
 
 export function getStaticPaths() {
-    return [
-        { params: { slug: 'hit-the-mauss' },        props: { title: 'Hit the Mauss' } },
-        { params: { slug: 'fill-the-repo' },         props: { title: 'Fill the Repo' } },
-        { params: { slug: 'linux-with-weix' },       props: { title: 'Linux with Weix' } },
-        { params: { slug: 'running-with-haeusler' }, props: { title: 'Running with Haeusler' } },
-        { params: { slug: 'test-the-tables' },       props: { title: 'Test the Tables' } },
-    ];
+    return games.map(({name,internal}) => ({
+        params: { slug: internal },
+        props: { title: name }
+    }))
 }
 
 const { slug } = Astro.params;
