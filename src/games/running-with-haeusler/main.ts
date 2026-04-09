@@ -1,4 +1,4 @@
-import {createGamePage} from "../../engine/bootstrap.ts";
-import {RunningWithHaeusler} from "./game.ts";
+import { createGamePage } from '../../engine/bootstrap.ts';
+import { RunningWithHaeusler } from './game.ts';
 
-createGamePage(RunningWithHaeusler)
+createGamePage(RunningWithHaeusler);

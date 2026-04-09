@@ -1,36 +1,47 @@
-import {Scene} from "./scene.ts";
-import type {Renderer} from "../core/renderer.ts";
-import type {Input} from "../core/input.ts";
-import {config} from "../config.ts";
+import { Scene } from './scene.ts';
+import type { Renderer } from '../core/renderer.ts';
+import type { Input } from '../core/input.ts';
+import { config } from '../config.ts';
 
 export class MenuScene extends Scene {
-    private starting = false;
+	private starting = false;
 
-    constructor(private onStart: () => void, private img?: HTMLImageElement) {
-        super();
-    }
+	constructor(
+		private onStart: () => void,
+		private img?: HTMLImageElement,
+	) {
+		super();
+	}
 
-    update(delta: number, input: Input): void {
-        if (input.isDown(["Enter", " "])) {
-            this.starting = true;
+	update(delta: number, input: Input): void {
+		if (input.isDown(['Enter', ' '])) {
+			this.starting = true;
 
-            setTimeout(() => {
-                this.onStart()
-            }, 500)
-        }
-    }
-    render(r: Renderer) {
-        if (this.img) r.drawImage(this.img, 0, 0, config.canvas_width, config.canvas_height);
+			setTimeout(() => {
+				this.onStart();
+			}, 500);
+		}
+	}
+	render(r: Renderer) {
+		if (this.img) {
+			r.drawImage(this.img, 0, 0, config.canvas_width, config.canvas_height);
+		}
 
-        const visible = this.starting
-            ? Math.floor(performance.now() / 50) % 2 === 0
-            : Math.floor(performance.now() / 500) % 2 === 0;
+		const visible = this.starting
+			? Math.floor(performance.now() / 50) % 2 === 0
+			: Math.floor(performance.now() / 500) % 2 === 0;
 
-        if (visible) {
-            r.advancedText("PRESS    START", config.canvas_width / 2, config.canvas_height / 2, "#fff", {
-                textBaseline: "middle",
-                textAlign: "center",
-            })
-        }
-    }
+		if (visible) {
+			r.advancedText(
+				'PRESS    START',
+				config.canvas_width / 2,
+				config.canvas_height / 2,
+				'#fff',
+				{
+					textBaseline: 'middle',
+					textAlign: 'center',
+				},
+			);
+		}
+	}
 }

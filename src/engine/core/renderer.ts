@@ -1,106 +1,101 @@
-import {config} from "../config.ts";
+import { config } from '../config.ts';
 
 export class Renderer {
-    ctx: CanvasRenderingContext2D;
-    cache = new Map<string, HTMLImageElement>();
+	ctx: CanvasRenderingContext2D;
+	cache = new Map<string, HTMLImageElement>();
 
-    constructor(private canvas: HTMLCanvasElement) {
-        this.ctx = canvas.getContext("2d")!;
+	constructor(private canvas: HTMLCanvasElement) {
+		this.ctx = canvas.getContext('2d')!;
 
-        this.ctx.imageSmoothingEnabled = false
-    }
+		this.ctx.imageSmoothingEnabled = false;
+	}
 
-    clear() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-    }
+	clear() {
+		this.ctx.clearRect(0, 0, this.width, this.height);
+	}
 
-    drawRect(x: number, y: number, w: number, h: number, c: string) {
-        this.ctx.fillStyle = c;
-        this.ctx.fillRect(
-            Math.floor(x),
-            Math.floor(y),
-            Math.floor(w),
-            Math.floor(h)
-        );
-    }
+	drawRect(x: number, y: number, w: number, h: number, c: string) {
+		this.ctx.fillStyle = c;
+		this.ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
+	}
 
-    drawScreenlines(lineSpacing = 4) {
-        this.ctx.save()
-        this.ctx.fillStyle = "rgba(255,255,255,0.05)"
+	drawScreenlines(lineSpacing = 4) {
+		this.ctx.save();
+		this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
 
-        for (let y = 0; y < config.canvas_height; y += lineSpacing) {
-            this.ctx.fillRect(0, y, config.canvas_width, 1)
-        }
+		for (let y = 0; y < config.canvas_height; y += lineSpacing) {
+			this.ctx.fillRect(0, y, config.canvas_width, 1);
+		}
 
-        this.ctx.restore()
-    }
+		this.ctx.restore();
+	}
 
-    async loadImage(src: string, cacheName?: string): Promise<HTMLImageElement> {
-        return new Promise((resolve, reject) => {
-            if (cacheName && this.cache.has(cacheName)) {
-                return resolve(this.cache.get(src)!);
-            }
+	async loadImage(src: string, cacheName?: string): Promise<HTMLImageElement> {
+		return new Promise((resolve, reject) => {
+			if (cacheName && this.cache.has(cacheName)) {
+				return resolve(this.cache.get(src)!);
+			}
 
-            const img = new Image()
-            img.src = src
-            img.onload = () => {
-                if (cacheName) {
-                    this.cache.set(cacheName, img);
-                }
+			const img = new Image();
+			img.src = src;
+			img.onload = () => {
+				if (cacheName) {
+					this.cache.set(cacheName, img);
+				}
 
-                resolve(img)
-            }
-            img.onerror = reject
-        })
-    }
+				resolve(img);
+			};
+			img.onerror = reject;
+		});
+	}
 
-    drawImage(img: HTMLImageElement, x: number, y: number, w?: number, h?: number) {
-        this.ctx.drawImage(
-            img,
-            Math.floor(x),
-            Math.floor(y),
-            w ?? img.width,
-            h ?? img.height,
-        )
-    }
+	drawImage(img: HTMLImageElement, x: number, y: number, w?: number, h?: number) {
+		this.ctx.drawImage(img, Math.floor(x), Math.floor(y), w ?? img.width, h ?? img.height);
+	}
 
-    text(text: string, x: number, y: number, color: string) {
-        this.ctx.font = config.font;
-        this.ctx.fillStyle = color;
-        this.ctx.fillText(text, x, y);
-    }
+	text(text: string, x: number, y: number, color: string) {
+		this.ctx.font = config.font;
+		this.ctx.fillStyle = color;
+		this.ctx.fillText(text, x, y);
+	}
 
-    advancedText(text: string, x: number, y: number, color: string, conf: {
-        textBaseline?: CanvasTextBaseline;
-        textAlign?: CanvasTextAlign;
-    }) {
-        this.ctx.save();
+	advancedText(
+		text: string,
+		x: number,
+		y: number,
+		color: string,
+		conf: {
+			textBaseline?: CanvasTextBaseline;
+			textAlign?: CanvasTextAlign;
+		},
+	) {
+		this.ctx.save();
 
-        this.ctx.font = config.font;
-        this.ctx.fillStyle = color;
+		this.ctx.font = config.font;
+		this.ctx.fillStyle = color;
 
-        if (conf.textBaseline) {
-            this.ctx.textBaseline = conf.textBaseline;
-        }
+		if (conf.textBaseline) {
+			this.ctx.textBaseline = conf.textBaseline;
+		}
 
-        if (conf.textAlign) {
-            this.ctx.textAlign = conf.textAlign;
-        }
+		if (conf.textAlign) {
+			this.ctx.textAlign = conf.textAlign;
+		}
 
-        this.ctx.fillText(text, x, y);
+		this.ctx.fillText(text, x, y);
 
-        this.ctx.restore();
-    }
+		this.ctx.restore();
+	}
 
-    getFromCache(src: string) {
-        return this.cache.get(src);
-    }
+	getFromCache(src: string) {
+		return this.cache.get(src);
+	}
 
-    get width() {
-        return this.canvas.width;
-    }
+	get width() {
+		return this.canvas.width;
+	}
 
-    get height() {
-        return this.canvas.height;
-    }
+	get height() {
+		return this.canvas.height;
+	}
 }

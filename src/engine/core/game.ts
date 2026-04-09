@@ -1,87 +1,98 @@
-import  {type Renderer} from "./renderer.ts";
-import  {type Scene} from "../scenes/scene.ts";
-import  {type Input} from "./input.ts";
-import type {AssetLoader} from "../assets/assetloader.ts";
+import { type Renderer } from './renderer.ts';
+import { type Scene } from '../scenes/scene.ts';
+import { type Input } from './input.ts';
+import type { AssetLoader } from '../assets/assetloader.ts';
 
 export abstract class Game {
-    private lastTime = 0;
-    private renderer?: Renderer;
-    private _input?: Input;
-    private _scene?: Scene;
+	private lastTime = 0;
+	private renderer?: Renderer;
+	private _input?: Input;
+	private _scene?: Scene;
 
-    private timeBuffer = 0;
+	private timeBuffer = 0;
 
-    protected constructor() {
-        this.loop = this.loop.bind(this);
-    }
+	protected constructor() {
+		this.loop = this.loop.bind(this);
+	}
 
+	get input(): Input {
+		if (!this._input) {
+			throw new Error('Input not found');
+		}
+		return this._input;
+	}
+	get scene(): Scene {
+		if (!this._scene) {
+			throw new Error('Scene not found');
+		}
+		return this._scene;
+	}
 
-    get input(): Input {
-        if (!this._input) throw new Error("Input not found");
-        return this._input;
-    }
-    get scene(): Scene {
-        if (!this._scene) throw new Error("Scene not found");
-        return this._scene;
-    }
+	set scene(value: Scene) {
+		this._scene = value;
+	}
 
-    set scene(value: Scene) {
-        this._scene = value;
-    }
+	/**
+	 * For adding assets that will be loaded before the game starts.
+	 *
+	 * Loading happens in `createGamePage`
+	 *
+	 * @example
+	 * loadAssets(loader: AssetLoader): void {
+	 *     loader.add(new SoundAsset("assets/sound.mp3"))
+	 *     loader.add(new ImageAsset("assets/image.jpg"))
+	 * }
+	 *
+	 * @see createGamePage
+	 */
+	loadAssets(loader: AssetLoader): void {}
 
-    /**
-     * For adding assets that will be loaded before the game starts.
-     *
-     * Loading happens in `createGamePage`
-     *
-     * @example
-     * loadAssets(loader: AssetLoader): void {
-     *     loader.add(new SoundAsset("assets/sound.mp3"))
-     *     loader.add(new ImageAsset("assets/image.jpg"))
-     * }
-     *
-     * @see createGamePage
-     */
-    loadAssets(loader: AssetLoader): void {}
+	init(renderer: Renderer, input: Input) {
+		this.renderer = renderer;
+		this._input = input;
+	}
 
-    init(renderer: Renderer, input: Input) {
-        this.renderer = renderer;
-        this._input = input;
-    }
+	async start() {
+		this.lastTime = Date.now();
+		requestAnimationFrame(this.loop);
+	}
 
-    async start() {
-        this.lastTime = Date.now();
-        requestAnimationFrame(this.loop);
-    }
+	reset() {}
 
-    reset() {}
+	private loop() {
+		if (!this.renderer) {
+			throw new Error('Renderer not found');
+		}
+		if (!this._scene) {
+			throw new Error('scene not found');
+		}
+		if (!this._input) {
+			throw new Error('Input not found');
+		}
 
-    private loop() {
-        if (!this.renderer) throw new Error("Renderer not found");
-        if (!this._scene) throw new Error("scene not found");
-        if (!this._input) throw new Error("Input not found");
+		const now = Date.now();
+		const delta = (now - this.lastTime) / 1000;
+		this.lastTime = now;
 
-        const now = Date.now();
-        const delta = (now - this.lastTime) / 1000;
-        this.lastTime = now;
+		if (delta > 500) {
+			console.error('delta time too high');
+		}
 
-        if (delta > 500) console.error("delta time too high")
+		this.update(delta, this._scene, this._input);
+		this.render(this.renderer, this._scene);
 
-        this.update(delta, this._scene, this._input)
-        this.render(this.renderer, this._scene);
+		requestAnimationFrame(this.loop);
+	}
 
-        requestAnimationFrame(this.loop);
-    };
+	update(delta: number, scene: Scene, input: Input) {
+		scene.update(delta, input);
+	}
 
-    update(delta: number, scene: Scene, input: Input) {
-        scene.update(delta, input);
-    }
+	private render(renderer: Renderer, scene: Scene) {
+		renderer.clear();
 
-    private render(renderer: Renderer, scene: Scene) {
-        renderer.clear();
+		scene.render(renderer);
 
-        scene.render(renderer);
-
-        renderer.drawScreenlines();
-    }
+		renderer.drawScreenlines();
+	}
 }
