@@ -26,5 +26,11 @@
     "slug": "running-with-haeusler",
     "description": "You're on a run with Haeusler, try to keep up with his pace if you dont want to fall behind.",
     "author": "SirMops123"
+  },
+  {
+    "name": "Hide the Shoes",
+    "slug": "hide-the-shoes",
+    "description": "You're on the school corridor with your shoes, hide your shoes from the Teachers, or else you wont make it.",
+    "author": "SirMops123"
   }
 ]
