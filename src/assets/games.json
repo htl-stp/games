@@ -1,32 +1,36 @@
 [
   {
     "name": "Linux with WEIX",
-    "internal": "linux-with-weix",
+    "slug": "linux-with-weix",
     "description": "Play as WEIX, and scare your students!",
     "author": "daftvoid"
   },
   {
     "name": "Hit the Mauss",
-    "internal": "hit-the-mauss",
-    "description": "No description available",
+    "slug": "hit-the-mauss",
     "author": "SirMops123"
   },
   {
     "name": "Fill the Repo",
-    "internal": "fill-the-repo",
-    "description": "No description available",
+    "slug": "fill-the-repo",
     "author": "SirMops123"
   },
   {
     "name": "Test the Tables",
-    "internal": "test-the-tables",
+    "slug": "test-the-tables",
     "description": "Hurry up and arrange the Tables before the Test starts!",
     "author": "SirMops123"
   },
   {
     "name": "Running with Häusler",
-    "internal": "running-with-haeusler",
+    "slug": "running-with-haeusler",
     "description": "You're on a run with Haeusler, try to keep up with his pace if you dont want to fall behind.",
+    "author": "SirMops123"
+  },
+  {
+    "name": "Hide the Shoes",
+    "slug": "hide-the-shoes",
+    "description": "You're on the school corridor with your shoes, hide your shoes from the Teachers, or else you wont make it.",
     "author": "SirMops123"
   }
 ]

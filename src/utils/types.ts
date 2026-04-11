@@ -1,6 +1,6 @@
 export interface GameConfig {
 	name: string;
-	internal: string;
+	slug: string;
 	description?: string;
 	author: string;
 }

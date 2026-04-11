@@ -7,11 +7,47 @@ import '@htl-stp/core/core.css';
 import '@htl-stp/core/utilities.css';
 import '@htl-stp/core/components.css';
 import '../styles/style.css'
+
+const title = "HTL Arcade";
+const desc = "A collection of games related to the HTL."
 ---
-<h1 class="text-center heading-xl">HTL Arcade</h1>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width"/>
+
+    <meta name="generator" content={Astro.generator}/>
+
+    <title>{title}</title>
+    <meta name="description" content={desc}>
+    <meta name="author" content="HTLSTP, but better! Team">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "HTL Arcade",
+            "url": "https://htl-stp.github.io/games",
+            "description": "A collection of games related to the HTL."
+        }
+    </script>
+
+    <!-- OG -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta
+            property="og:image"
+            content="https://avatars.githubusercontent.com/u/268969957?s=400&u=19bb1594ad97c9e3c133564d4c3a6e097661821c"
+    />
+    <meta property="og:url" content="https://htl-stp.github.io/games" />
+    <meta property="og:type" content="website" />
+</head>
+<body>
+<h1 class="text-center heading-xl mt-lg">HTL Arcade</h1>
 
 <main class="section container grid grid-3">
     {games.map(g => (
         <GameCard game={g}></GameCard>
     ))}
 </main>
+</body>

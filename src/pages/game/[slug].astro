@@ -3,16 +3,18 @@ import GameLayout from '../../layouts/GameLayout.astro';
 import games from '../../assets/games.json';
 
 export function getStaticPaths() {
-    return games.map(({name,internal}) => ({
-        params: { slug: internal },
+    return games.map(({name,slug}) => ({
+        params: { slug },
         props: { title: name }
     }))
 }
 
 const { slug } = Astro.params;
 const { title } = Astro.props;
+
+const game = games.find(v => v.slug === slug)!
 ---
-<GameLayout title={title}>
+<GameLayout game={game}>
     <canvas id="gamecanvas" data-slug={slug}></canvas>
     <script>
         const games = import.meta.glob('../../games/*/main.ts');

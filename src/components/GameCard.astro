@@ -12,19 +12,19 @@ const thumbnails = import.meta.glob(`../assets/images/thumbnails/*.png`, { eager
 const slugToThumbnail: Record<string, string> = {};
 for (const [path, mod] of Object.entries(thumbnails)) {
     const match = path.match(/.*thumbnails\/(.+)\.png$/);
-    if (match) slugToThumbnail[match[1]] = (mod as { default: string }).default.src;
+    if (match) slugToThumbnail[match[1]] = (mod as { default: { src: string } }).default.src!;
 }
 
-const thumbnailUrl = slugToThumbnail[game.internal] ?? '/fallback.png';
+const thumbnailUrl = slugToThumbnail[game.slug] ?? '/fallback.png';
 console.log(thumbnailUrl);
 ---
 <div class="game card">
-    <a href={`./game/${game.internal}`}>
+    <a href={`./game/${game.slug}`}>
         <img src={thumbnailUrl} alt="Game Image">
     </a>
 
     <h1>
-        <a href={`./game/${game.internal}`} class="heading-lg">
+        <a href={`./game/${game.slug}`} class="heading-lg">
             {game.name}
         </a>
     </h1>
