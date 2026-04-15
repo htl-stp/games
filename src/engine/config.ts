@@ -23,10 +23,10 @@ export const config = {
 		},
 	},
 	keys: {
-		up: ['w', 'ArrowUp'],
-		left: ['a', 'ArrowLeft'],
-		down: ['s', 'ArrowDown'],
-		right: ['d', 'ArrowRight'],
+		up: ['w', 'W', 'ArrowUp'],
+		left: ['a', 'A', 'ArrowLeft'],
+		down: ['s', 'S', 'ArrowDown'],
+		right: ['d', 'D', 'ArrowRight'],
 		confirm: ['Enter', ' '],
 	},
 };
