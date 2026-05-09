@@ -8,6 +8,9 @@ import { MenuScene } from '../../engine/scenes/menuScene.ts';
 import { signal } from '../../engine/utils/signal.ts';
 import { HeartDisplay } from '../../engine/entity/heartDisplay.ts';
 import { ScoreDisplay } from '../../engine/entity/scoreDisplay.ts';
+import song from '@assets/sounds/songs/awkward_monochrome_mice.wav';
+import {SoundAsset} from "@engine/assets/asset.ts";
+import type {AssetLoader} from "@engine/assets/assetloader.ts";
 
 class Mauss extends Entity {
 	private active = false;
@@ -105,6 +108,8 @@ class GameScene extends Scene {
 
 	constructor() {
 		super();
+		songAsset.play();
+
 		this.entities.push(new Hammer());
 
 		const y = 120;
@@ -158,6 +163,7 @@ class GameScene extends Scene {
 						if (this.lives() <= 0) {
 							console.log('Game Over');
 							this.gamestate = 'end';
+							songAsset.stop();
 						}
 					}
 				} else {
@@ -243,6 +249,9 @@ class GameScene extends Scene {
 	}
 }
 
+const songAsset = new SoundAsset(song);
+
+
 export class HitTheMauss extends Game {
 	constructor() {
 		super();
@@ -254,5 +263,11 @@ export class HitTheMauss extends Game {
 
 	reset() {
 		this.scene = new GameScene();
+	}
+
+	loadAssets(loader: AssetLoader) {
+		super.loadAssets(loader);
+
+		loader.add(songAsset);
 	}
 }
