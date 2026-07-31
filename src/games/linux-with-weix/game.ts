@@ -5,9 +5,11 @@ import { Scene } from '../../engine/scenes/scene.ts';
 import { config } from '../../engine/config.ts';
 import type { Input } from '../../engine/core/input.ts';
 import { MenuScene } from '../../engine/scenes/menuScene.ts';
-import { HeartDisplay } from '../../engine/entity/heartDisplay.ts';
 import { ScoreDisplay } from '../../engine/entity/scoreDisplay.ts';
 import { signal } from '../../engine/utils/signal.ts';
+import { SoundAsset } from '@engine/assets/asset.ts';
+import song from '@assets/sounds/songs/midget_shuffles.wav';
+import type { AssetLoader } from '@engine/assets/assetloader.ts';
 
 class Weix extends Entity {
 	constructor() {
@@ -108,6 +110,7 @@ class GameScene extends Scene {
 
 	constructor() {
 		super();
+		songAsset.play()
 
 		this.entities.push(new ScareArea());
 		this.entities.push(new Weix());
@@ -166,8 +169,11 @@ class GameScene extends Scene {
 		}
 
 		this.gamestate = 'end';
+		songAsset.stop()
 	}
 }
+
+const songAsset = new SoundAsset(song);
 
 export class LinuxWithWeix extends Game {
 	constructor() {
@@ -180,5 +186,11 @@ export class LinuxWithWeix extends Game {
 
 	reset() {
 		this.scene = new GameScene();
+	}
+
+	loadAssets(loader: AssetLoader) {
+		super.loadAssets(loader);
+
+		loader.add(songAsset);
 	}
 }

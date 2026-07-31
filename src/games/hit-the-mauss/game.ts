@@ -9,8 +9,8 @@ import { signal } from '../../engine/utils/signal.ts';
 import { HeartDisplay } from '../../engine/entity/heartDisplay.ts';
 import { ScoreDisplay } from '../../engine/entity/scoreDisplay.ts';
 import song from '@assets/sounds/songs/awkward_monochrome_mice.wav';
-import {SoundAsset} from "@engine/assets/asset.ts";
-import type {AssetLoader} from "@engine/assets/assetloader.ts";
+import {SoundAsset} from '@engine/assets/asset.ts';
+import type {AssetLoader} from '@engine/assets/assetloader.ts';
 
 class Mauss extends Entity {
 	private active = false;
