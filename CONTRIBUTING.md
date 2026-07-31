@@ -38,4 +38,4 @@ If something needs to be encapsulated in the future, IntelliJ can handle it with
 
 ## Other Notes
 
-If you would like your name to appear in the credits, add it to the [list of contributors](https://github.com/htl-stp/games/blob/main/public/assets/contributors) as part of your PR.
+If you would like your name to appear in the credits, add it to the [list of contributors](https://github.com/htl-stp/games/blob/main/src/assets/contributors) as part of your PR.
