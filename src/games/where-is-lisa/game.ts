@@ -95,10 +95,14 @@ class GameScene extends Scene {
 	update(delta: number, input: Input) {
 		switch (this.state) {
 			case 'game over':
-				gameOverAsset.play();
+				if(!gameOverAsset.isPlaying()){
+					gameOverAsset.play();
+				}
 				return;
 			case 'won':
-				winAsset.play();
+				if(!winAsset.isPlaying()){
+					winAsset.play();
+				}
 				return;
 			case 'running':
 				break;
