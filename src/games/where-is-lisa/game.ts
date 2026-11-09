@@ -86,12 +86,12 @@ class Student extends Entity {
 			this.y = randInt(-HEIGHT - 10, 0);
 			break;
 		case 'top left':
-			this.x = randInt(0, 2 * WIDTH - 10);
-			this.y = randInt(0, 2 * HEIGHT - 10);
+			this.x = randInt(WIDTH, 2 * WIDTH - 10);
+			this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
 			break;
 		case 'top right':
 			this.x = randInt(-WIDTH - 10, 0);
-			this.y = randInt(-HEIGHT - 10, 0);
+			this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
 			break;
 	}
   }
