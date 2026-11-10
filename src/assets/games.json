@@ -32,5 +32,11 @@
     "slug": "hide-the-shoes",
     "description": "You're on the school corridor with your shoes, hide your shoes from the Teachers, or else you wont make it.",
     "author": "SirMops123"
+  },
+  {
+    "name": "Where is Lisa",
+    "slug": "where-is-lisa",
+    "description": "It's lunch break and all the student are out while you lost your best friend Lisa in the corridor! Can you find her?",
+    "author": "InuYasha33"
   }
 ]
