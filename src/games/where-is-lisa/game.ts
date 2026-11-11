@@ -1,15 +1,15 @@
 import { Game } from '@engine/core/game.ts';
 import { MenuScene } from '@engine/scenes/menuScene.ts';
 import { Scene } from '@engine/scenes/scene.ts';
-import  { type Input } from '@engine/core/input.ts';
+import { type Input } from '@engine/core/input.ts';
 import { config } from '@engine/config.ts';
 import { Entity } from '@engine/entity/entity.ts';
-import  { type Renderer } from '@engine/core/renderer.ts';
+import { type Renderer } from '@engine/core/renderer.ts';
 import { SoundAsset } from '@engine/assets/asset.ts';
 import type { AssetLoader } from '@engine/assets/assetloader.ts';
 
 import song from '@assets/sounds/songs/the_search.wav';
-import game_over from "@assets/sounds/sound_effects/game_over.wav"
+import game_over from '@assets/sounds/sound_effects/game_over.wav';
 
 type GameState = 'running' | 'game over';
 const songAsset = new SoundAsset(song);
@@ -18,27 +18,27 @@ const gameOverAsset = new SoundAsset(game_over);
 const randInt = (min: number, max: number): number =>
 	Math.floor(Math.random() * (max - min + 1)) + min;
 const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
+	Math.min(Math.max(value, min), max);
 const PLAYER_SPEED: number = 250;
-const WIDTH:number = 240;
-const HEIGHT:number = 180;
+const WIDTH: number = 240;
+const HEIGHT: number = 180;
 const ENEMY_SPEED = 300;
-const directions = ["bottom left", "bottom right", "top left", "top right"];
+const directions = ['bottom left', 'bottom right', 'top left', 'top right'];
 let stage = 1;
 const NextDirectionIntervall = 2;
 
 class Student extends Entity {
 	private direction: string;
-	private boost:number;
-	constructor(direction:string) {
+	private boost: number;
+	constructor(direction: string) {
 		super(0, 0, 10, 10);
 		this.direction = direction;
-    this.resetPosition();
-		this.boost = randInt(5,10)/10;
+		this.resetPosition();
+		this.boost = randInt(5, 10) / 10;
 	}
 	update(delta: number) {
 		super.update(delta);
-		const speed = ((stage+5) / 50) * ENEMY_SPEED * this.boost * delta;
+		const speed = ((stage + 5) / 50) * ENEMY_SPEED * this.boost * delta;
 		switch (this.direction) {
 			case 'bottom left':
 				if (this.x < 0 || this.y > HEIGHT) {
@@ -74,56 +74,48 @@ class Student extends Entity {
 		r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.red);
 	}
 
-  public resetPosition() {
-	this.direction = directions[randInt(0, ((stage / NextDirectionIntervall) % 4) - 1)];
-	switch (this.direction) {
-		case 'bottom left':
-			this.x = randInt(WIDTH - 10, 2 * WIDTH - 10);
-			this.y = randInt(-HEIGHT - 10, 0);
-			break;
-		case 'bottom right':
-			this.x = randInt(-WIDTH - 10, 0);
-			this.y = randInt(-HEIGHT - 10, 0);
-			break;
-		case 'top left':
-			this.x = randInt(WIDTH, 2 * WIDTH - 10);
-			this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
-			break;
-		case 'top right':
-			this.x = randInt(-WIDTH - 10, 0);
-			this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
-			break;
+	public resetPosition() {
+		this.direction = directions[randInt(0, ((stage / NextDirectionIntervall) % 4) - 1)];
+		switch (this.direction) {
+			case 'bottom left':
+				this.x = randInt(WIDTH - 10, 2 * WIDTH - 10);
+				this.y = randInt(-HEIGHT - 10, 0);
+				break;
+			case 'bottom right':
+				this.x = randInt(-WIDTH - 10, 0);
+				this.y = randInt(-HEIGHT - 10, 0);
+				break;
+			case 'top left':
+				this.x = randInt(WIDTH, 2 * WIDTH - 10);
+				this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
+				break;
+			case 'top right':
+				this.x = randInt(-WIDTH - 10, 0);
+				this.y = randInt(HEIGHT, 2 * HEIGHT - 10);
+				break;
+		}
 	}
-  }
 }
 
 class Lisa extends Student {
 	render(r: Renderer) {
-    r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.green);
-  }
+		r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.green);
+	}
 }
-
 
 class Player extends Entity {
 	constructor() {
-		super(WIDTH/2-5, HEIGHT/2-5, 5, 5);
+		super(WIDTH / 2 - 5, HEIGHT / 2 - 5, 5, 5);
 	}
 	update(delta: number) {
 		super.update(delta);
-    this.x = clamp(this.x, 0, WIDTH-this.w);
-    this.y = clamp(this.y, 0, HEIGHT-this.h);
+		this.x = clamp(this.x, 0, WIDTH - this.w);
+		this.y = clamp(this.y, 0, HEIGHT - this.h);
 	}
 	render(r: Renderer) {
-		r.drawRect(
-			this.x,
-			this.y,
-			this.w,
-			this.h,
-			config.theme.colors.purple,
-		);
+		r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.purple);
 	}
 }
-
 
 class GameScene extends Scene {
 	state: GameState = 'running';
@@ -197,7 +189,7 @@ class GameScene extends Scene {
 			);
 			songAsset.pause();
 		}
-		let timeText = 'Stage: ' + stage;
+		const timeText = 'Stage: ' + stage;
 		renderer.advancedText(timeText, 160, 7, config.theme.colors.white, {
 			textAlign: 'left',
 			textBaseline: 'top',

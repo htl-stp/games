@@ -110,7 +110,7 @@ class GameScene extends Scene {
 
 	constructor() {
 		super();
-		songAsset.play()
+		songAsset.play();
 
 		this.entities.push(new ScareArea());
 		this.entities.push(new Weix());
@@ -169,7 +169,7 @@ class GameScene extends Scene {
 		}
 
 		this.gamestate = 'end';
-		songAsset.stop()
+		songAsset.stop();
 	}
 }
 
