@@ -151,8 +151,6 @@ class Bullet extends Entity {
 
 		this.targetX = targetX;
 		this.targetY = targetY;
-
-
 	}
 
 	update(delta: number) {
@@ -161,12 +159,16 @@ class Bullet extends Entity {
 
 	speed = 100;
 	handleMovement(delta: number) {
-		const angleX = (this.targetY-this.y)/(this.targetX-this.x);
- 		const angleY = -1;
+		const dx = this.targetX - this.x;
+		const dy = this.targetY - this.y;
+		// Pythagoras, yet again
+		const dist = Math.sqrt(dx * dx + dy * dy);
 
 
-		this.x += this.speed * delta * angleX;
-		this.y += this.speed * delta * angleY;
+		const dirX = dx / dist;
+		const dirY = dy / dist;
+		this.x += dirX * (this.speed * delta);
+		this.y += dirY * (this.speed * delta);
 	}
 
 	collidesWith(other: Entity): boolean {
@@ -279,8 +281,8 @@ class Crosshair extends Entity {
 		// fire at crosshair
 		this.bullets.push(new Bullet(this.x, this.y));
 
+		////////////////////////////////////////////////////////////////////
 		setInterval(() => {
-			console.log(this.bullets.length);
 		}, 500);
 	}
 
