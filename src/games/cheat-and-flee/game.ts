@@ -146,11 +146,30 @@ class Bullet extends Entity {
 	targetX = 0;
 	targetY = 0;
 
+	// direction to go
+	dirX = 0;
+	dirY = 0;
+
+	// NOTE: there's a lot of math here
+	// don't ask me to elaborate, it took me modeling, heavy thinking and plenty of frustration
 	constructor(targetX: number, targetY: number) {
 		super(config.canvas_width / 2, 155, 2, 2);
 
 		this.targetX = targetX;
 		this.targetY = targetY;
+
+		// define "delta x" and "delta y", aka. the direction to go
+		const dx = this.targetX - this.x;
+		const dy = this.targetY - this.y;
+
+		// define the hypotenuse
+		// "I wish I was high on potenuse"
+		const dist = Math.sqrt(dx * dx + dy * dy);
+
+		// proportional division to get the vector direction
+		// its just math, don't ask me
+		this.dirX = dx / dist;
+		this.dirY = dy / dist;
 	}
 
 	update(delta: number) {
@@ -159,16 +178,8 @@ class Bullet extends Entity {
 
 	speed = 100;
 	handleMovement(delta: number) {
-		const dx = this.targetX - this.x;
-		const dy = this.targetY - this.y;
-		// Pythagoras, yet again
-		const dist = Math.sqrt(dx * dx + dy * dy);
-
-
-		const dirX = dx / dist;
-		const dirY = dy / dist;
-		this.x += dirX * (this.speed * delta);
-		this.y += dirY * (this.speed * delta);
+		this.x += this.dirX * this.speed * delta;
+		this.y += this.dirY * this.speed * delta;
 	}
 
 	collidesWith(other: Entity): boolean {
