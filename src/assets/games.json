@@ -38,5 +38,11 @@
     "slug": "the-final-stand",
     "description": "The exam is about to end! Quickly finish writing your last words before the teacher snatches your sheet away!",
     "author": "casper"
+  },
+  {
+    "name": "Cheat & Flee",
+    "slug": "cheat-and-flee",
+    "description": "You haven't studied for the exam so you try cheating. Make your way without getting caught until the timer hits zero!",
+    "author": "casper"
   }
 ]
