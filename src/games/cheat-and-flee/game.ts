@@ -8,6 +8,8 @@ import { Entity } from '@engine/entity/entity.ts';
 import  { type Renderer } from '@engine/core/renderer.ts';
 import { Input } from '@engine/core/input.ts';
 import { config } from '@engine/config.ts';
+import type { Vulnerable } from '@games/cheat-and-flee/vulnerable.ts';
+import type { InflictsDamage } from '@games/cheat-and-flee/inflictsDamage.ts';
 
 class Timer extends Entity {
 	ms = 0;
@@ -139,9 +141,10 @@ class Timer extends Entity {
 	}
 }
 
-class Bullet extends Entity {
-	color = config.theme.colors.yellow;
-	lifetime = 500; // in milliseconds
+class Rocket extends Entity implements InflictsDamage {
+	color = config.theme.colors.red;
+	lifetime = 2000; // in milliseconds
+	speed = 250;
 
 	targetX = 0;
 	targetY = 0;
@@ -150,11 +153,20 @@ class Bullet extends Entity {
 	dirX = 0;
 	dirY = 0;
 
+	damage: number = 180;
+	explosion_size_multiplier = 2;
+
 	// NOTE: there's a lot of math here
 	// don't ask me to elaborate, it took me modeling, heavy thinking and plenty of frustration
-	constructor(targetX: number, targetY: number) {
-		super(config.canvas_width / 2, 155, 2, 2);
-
+	constructor(
+		targetX: number,
+		targetY: number,
+		private inflictsDamage: Entity[],
+		offset_x: number,
+		offset_y: number,
+	) {
+		super(config.canvas_width / 2 + offset_x, 155 + offset_y, 10, 10);
+		this.speed = Math.floor(Math.random() * 250) + 150;
 		this.targetX = targetX;
 		this.targetY = targetY;
 
@@ -172,18 +184,102 @@ class Bullet extends Entity {
 		this.dirY = dy / dist;
 	}
 
+	timer = 0;
 	update(delta: number) {
 		this.handleMovement(delta);
+
+		if (this.timer >= this.lifetime) {
+			for (let i = 0; i < this.inflictsDamage.length; i++) {
+				if (this.inflictsDamage[i] === this) {
+					this.inflictsDamage.splice(i, 1);
+					return;
+				}
+			}
+		}
+		this.timer += delta * 1000;
 	}
 
-	speed = 100;
 	handleMovement(delta: number) {
 		this.x += this.dirX * this.speed * delta;
 		this.y += this.dirY * this.speed * delta;
 	}
 
-	collidesWith(other: Entity): boolean {
+	collidesWith(other: (Entity & Vulnerable)): boolean {
 		return super.collidesWith(other);
+	}
+
+	render(r: Renderer) {
+		r.drawRect(this.x-this.w/2, this.y, this.w, this.h, this.color);
+	}
+}
+
+class Bullet extends Entity implements InflictsDamage {
+	color = config.theme.colors.yellow;
+	lifetime = 500; // in milliseconds
+	speed = 2000;
+
+	targetX = 0;
+	targetY = 0;
+
+	// direction to go
+	dirX = 0;
+	dirY = 0;
+
+	damage: number = 10;
+	explosion_size_multiplier: number = 5;
+
+	// NOTE: there's a lot of math here
+	// don't ask me to elaborate, it took me modeling, heavy thinking and plenty of frustration
+	constructor(
+		targetX: number,
+		targetY: number,
+		private inflictsDamage: (Entity & InflictsDamage)[],
+		offset_x: number,
+		offset_y: number,
+	) {
+		super(config.canvas_width / 2 + offset_x, 155 + offset_y, 2, 2);
+		this.speed = Math.floor(Math.random() * 500) + 200;
+		this.targetX = targetX;
+		this.targetY = targetY;
+
+		// define "delta x" and "delta y", aka. the direction to go
+		const dx = this.targetX - this.x;
+		const dy = this.targetY - this.y;
+
+		// define the hypotenuse
+		// "I wish I was high on potenuse"
+		const dist = Math.sqrt(dx * dx + dy * dy);
+
+		// proportional division to get the vector direction
+		// its just math, don't ask me
+		this.dirX = dx / dist;
+		this.dirY = dy / dist;
+	}
+
+
+	timer = 0;
+	update(delta: number) {
+		this.handleMovement(delta);
+
+		if (this.timer >= this.lifetime) {
+			for (let i = 0; i < this.inflictsDamage.length; i++) {
+				if (this.inflictsDamage[i] === this) {
+					this.inflictsDamage.splice(i, 1);
+					return;
+				}
+			}
+		}
+		this.timer += delta * 1000;
+	}
+
+	handleMovement(delta: number) {
+		this.x += this.dirX * this.speed * delta;
+		this.y += this.dirY * this.speed * delta;
+	}
+
+	collidesWith(other: (Entity & Vulnerable)): boolean {
+		return super.collidesWith(other);
+
 	}
 
 	render(r: Renderer) {
@@ -195,8 +291,32 @@ class Crosshair extends Entity {
 	color = config.theme.colors.green;
 	input: Input = new Input();
 
-	constructor(private bullets: Entity[]) {
+	// 0 = bullets, 1 = rockets, ...
+	mode: number = 0;
+
+	firing: boolean = false;
+	constructor(
+		private inflictsDamage: (Entity & InflictsDamage)[],
+		private gamescene: GameScene,
+	) {
 		super(config.canvas_width / 2, config.canvas_height / 2, 0, 0);
+
+		this.input.onKeyDown((key) => {
+			if (key === ' ') {
+				this.firing = !this.firing;
+				this.gamescene.mothership.muzzle_color = config.theme.colors.red;
+			}
+			if (!this.firing) {
+				this.gamescene.mothership.muzzle_color = config.theme.colors.black;
+			}
+
+			if (key === '1') {
+				this.mode = 0;
+			}
+			if (key === '2') {
+				this.mode = 1;
+			}
+		});
 	}
 
 	// all 3 are in proportion to each other
@@ -206,7 +326,7 @@ class Crosshair extends Entity {
 	crosshair_length = 10; // default 10
 	render(r: Renderer) {
 		// center dot
-		r.drawRect(this.x, this.y, this.crosshair_thickness, this.crosshair_thickness, this.color);
+		// r.drawRect(this.x, this.y, this.crosshair_thickness, this.crosshair_thickness, this.color);
 
 		// bottom
 		r.drawRect(
@@ -243,10 +363,10 @@ class Crosshair extends Entity {
 
 		// rect top
 		r.drawRect(
-			this.x - this.crosshair_length + this.crosshair_gap/2,
+			this.x - this.crosshair_length + this.crosshair_gap / 2,
 			this.y - this.crosshair_gap * 2,
 			this.crosshair_gap * 4 + this.crosshair_thickness,
-			this.crosshair_gap/2,
+			this.crosshair_gap / 2,
 			this.color,
 		);
 		// rect bottom
@@ -268,12 +388,30 @@ class Crosshair extends Entity {
 		);
 		// rect right
 		r.drawRect(
-			this.x + this.crosshair_gap*2,
+			this.x + this.crosshair_gap * 2,
 			this.y - this.crosshair_length + this.crosshair_gap,
 			this.crosshair_thickness,
 			this.crosshair_length + this.crosshair_gap,
 			this.color,
 		);
+
+		// weapon symbols
+		if (this.mode === 0) {
+			r.drawRect(2, 2, 60, 15, config.theme.colors.black);
+			r.advancedText('BULLETS', 5, 10, config.theme.colors.yellow, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		}
+		// weapon symbols
+		if (this.mode === 1) {
+			r.drawRect(2, 2, 60, 15, config.theme.colors.dark_red);
+			r.advancedText('ROCKETS', 5, 10, config.theme.colors.yellow, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		}
+
 	}
 
 	speed: number = 400;
@@ -282,19 +420,33 @@ class Crosshair extends Entity {
 		this.handleFire(delta);
 	}
 
+	firerate = 650; // bullets/min
+	timer = 0;
+	// toggle system
 	handleFire(delta: number) {
-		if (this.input.isDown(' ')) {
-			this.fire();
+		if (this.firing) {
+			if (this.timer >= 60 / this.firerate) {
+				this.fire();
+				this.timer = 0;
+			}
 		}
+		this.timer += delta;
 	}
 
 	fire() {
-		// fire at crosshair
-		this.bullets.push(new Bullet(this.x, this.y));
-
-		////////////////////////////////////////////////////////////////////
-		setInterval(() => {
-		}, 500);
+		if (this.mode === 0) {
+			this.firerate = 650;
+			// fire bullets
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 0, 0));
+			this.inflictsDamage.push(new Bullet(this.x + 10, this.y, this.inflictsDamage, 3, 5));
+			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, -3, 5));
+			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, 5, 5));
+			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, 5, 5));
+		}
+		if (this.mode === 1) {
+			this.firerate = 100;
+			this.inflictsDamage.push(new Rocket(this.x, this.y, this.inflictsDamage, 0, 0));
+		}
 	}
 
 	handleMovement(delta: number) {
@@ -321,7 +473,7 @@ class Crosshair extends Entity {
 			dy *= inv;
 		}
 
-		const k = dy/dx; // angle
+		const k = dy / dx; // angle
 		// console.log(k);
 
 		// overshot x
@@ -339,7 +491,6 @@ class Crosshair extends Entity {
 		// overshot  y
 		if (this.y >= config.canvas_height && dy > 0) {
 			dy = 0;
-
 		}
 		// undershot y
 		if (this.y <= 0 && dy < 0) {
@@ -347,50 +498,78 @@ class Crosshair extends Entity {
 		}
 
 		if (this.input.isDown('Shift')) {
-			this.x += dx * (this.speed/2) * delta;
-			this.y += dy * (this.speed/2) * delta;
+			this.x += dx * (this.speed / 4) * delta;
+			this.y += dy * (this.speed / 4) * delta;
 		}
-		if (!(this.input.isDown('Shift'))) {
+		if (!this.input.isDown('Shift')) {
 			this.x += dx * this.speed * delta;
 			this.y += dy * this.speed * delta;
 		}
 
 		const minX = 0;
-		const maxX = config.canvas_width-2;
+		const maxX = config.canvas_width - 2;
 		const minY = 0;
-		const maxY = config.canvas_height-2;
+		const maxY = config.canvas_height - 2;
 
 		this.x = Math.min(Math.max(this.x, minX), maxX);
 		this.y = Math.min(Math.max(this.y, minY), maxY);
 	}
 }
 
-class ControlInfo extends Entity {
+class ControlInfo extends Entity implements Vulnerable {
 	rect_color = config.theme.colors.gray;
 	text_color = config.theme.colors.dark_gray;
 	change: boolean = false;
 
-	constructor(private entities: Entity[]) {
-		super(0, 0, 145, 30);
+	HP: number = 1000;
+
+	constructor(private vulnerables: (Entity & Vulnerable)[]) {
+		super(config.canvas_width / 2 - 55, config.canvas_height / 2 - 25, 110, 50);
+	}
+
+	takeDamage(damage: number): void {
+		if (this.HP < 0) {
+			for (let i = 0; i < this.vulnerables.length; ++i) {
+				if (this.vulnerables[i] === this) {
+					this.vulnerables.splice(i, 1);
+					return;
+				}
+			}
+		}
+		this.rect_color = config.theme.colors.red;
+		setInterval(() => {
+			this.rect_color = config.theme.colors.gray;
+		}, 100);
+
+		this.HP -= damage;
 	}
 
 	render(r: Renderer) {
 		r.drawRect(this.x, this.y, this.w, this.h, this.rect_color);
 
-		r.advancedText('ARROWKEYS = MOVE', this.x + 2, this.y + 10, this.text_color, {
+		r.advancedText('CONTROLS:', this.x + this.w / 5, this.y + 10, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('SHIFT = SLOW', this.x + 2, this.y + 20, this.text_color, {
+		r.advancedText('ARROW = MOVE', this.x + 2, this.y + 20, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
+		r.advancedText('SHIFT = SLOW', this.x + 2, this.y + 30, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+		r.advancedText('SPACE = FIRE', this.x + 2, this.y + 40, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+
 	}
 
 	elapsed = 0;
 	counter = 0;
 	update(delta: number) {
-		if (this.counter <= 25) {
+		if (this.counter <= 50) {
 			if (this.elapsed >= 0.1) {
 				if (this.change) {
 					this.text_color = config.theme.colors.gray;
@@ -402,26 +581,26 @@ class ControlInfo extends Entity {
 				this.counter += 1;
 			}
 			this.elapsed += delta;
-		} else {
-			for (let i = 0; i < this.entities.length; i++) {
-				if (this.entities.at(i) === this) {
-					this.entities.splice(i, 1);
-					break;
-				}
-			}
 		}
 	}
 }
 
 class Mothership extends Entity {
+	muzzle_color = config.theme.colors.black;
+
 	constructor() {
 		super(config.canvas_width / 2 - 10, 155, 20, 20);
 	}
 
 	render(r: Renderer) {
 		r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.gray);
-
-		r.drawRect(this.x+this.w*0.25, this.y, this.w*0.5, this.h*0.5, config.theme.colors.black);
+		r.drawRect(
+			this.x + this.w * 0.25,
+			this.y,
+			this.w * 0.5,
+			this.h * 0.5,
+			this.muzzle_color,
+		);
 	}
 }
 
@@ -444,10 +623,19 @@ class FarStar extends Entity {
 
 	update(delta: number) {
 		if (this.y >= config.canvas_height + 10) {
-			this.y = 0;
+			this.y = -30;
 			this.x = Math.floor(Math.random() * config.canvas_width);
 			this.size = Math.floor(Math.random() * FarStar.max_size) + FarStar.min_size;
 			this.speed = Math.floor(Math.random() * FarStar.max_speed) + FarStar.min_speed;
+
+			// Meteorites
+			if ((Math.floor(Math.random() * 20) + 1) === 5) {
+				this.size = Math.floor(Math.random() * 5) + 1;
+				this.speed = 500;
+				this.color = config.theme.colors.yellow;
+			} else {
+				this.color = config.theme.colors.white;
+			}
 		}
 
 		this.y += delta * this.speed;
@@ -462,22 +650,28 @@ type GameState = 'start' | 'running' | 'pause' | 'end';
 class GameScene extends Scene {
 	entities: Entity[] = [];
 	stars: Entity[] = [];
-	bullets: Entity[] = [];
+
+	// weapons
+	inflictsDamage: (Entity & InflictsDamage)[] = [];
+
+	// targets
+	vulnerables: (Entity & Vulnerable)[] = [];
+
 	input: Input = new Input();
 	private gamestate: GameState = 'running';
 
-	crosshair: Crosshair = new Crosshair(this.bullets);
+	crosshair: Crosshair = new Crosshair(this.inflictsDamage, this);
 	timer: Timer = new Timer();
-	controlinfo: ControlInfo = new ControlInfo(this.entities);
 	mothership: Mothership = new Mothership();
+	controlinfo: ControlInfo = new ControlInfo(this.vulnerables);
 
 	constructor() {
 		super();
 
 		this.entities.push(this.timer);
 		this.entities.push(this.crosshair);
-		this.entities.push(this.controlinfo);
 		this.entities.push(this.mothership);
+		this.vulnerables.push(this.controlinfo);
 
 		const n = 30; // amount of stars (default 15)
 		for (let i = 0; i < n; i++) {
@@ -495,8 +689,34 @@ class GameScene extends Scene {
 			for (const e of this.stars) {
 				e.update(dt);
 			}
-			for (const e of this.bullets) {
+			for (const e of this.inflictsDamage) {
 				e.update(dt);
+			}
+			for (const e of this.vulnerables) {
+				e.update(dt);
+			}
+		}
+
+		this.handleCollisions();
+	}
+
+	isVulnerable(entity: Entity): entity is Entity & Vulnerable {
+		return 'HP' in entity;
+	}
+	handleCollisions() {
+		for (let i = 0; i < this.vulnerables.length; i++) {
+			for (let j = 0; j < this.inflictsDamage.length; j++) {
+				if (this.inflictsDamage[j].collidesWith(this.vulnerables[i])) {
+					this.inflictsDamage[j].color = config.theme.colors.white;
+					this.inflictsDamage[j].w *= this.inflictsDamage[j].explosion_size_multiplier;
+					this.inflictsDamage[j].h *= this.inflictsDamage[j].explosion_size_multiplier;
+
+					this.vulnerables[i].takeDamage(this.inflictsDamage[j].damage);
+					setTimeout(() => {
+						this.inflictsDamage.splice(j, 1);
+					});
+					return;
+				}
 			}
 		}
 	}
@@ -509,7 +729,10 @@ class GameScene extends Scene {
 		for (const e of this.entities) {
 			e.render(r);
 		}
-		for (const e of this.bullets) {
+		for (const e of this.inflictsDamage) {
+			e.render(r);
+		}
+		for (const e of this.vulnerables) {
 			e.render(r);
 		}
 	}
