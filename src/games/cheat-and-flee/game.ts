@@ -2,14 +2,44 @@ import { Game } from '@engine/core/game.ts';
 import { MenuScene } from '@engine/scenes/menuScene.ts';
 import type { AssetLoader } from '@engine/assets/assetloader.ts';
 import { Scene } from '@engine/scenes/scene.ts';
-import { SoundAsset } from '@engine/assets/asset.ts';
-import song from '@assets/sounds/songs/midget_shuffles.wav';
 import { Entity } from '@engine/entity/entity.ts';
 import  { type Renderer } from '@engine/core/renderer.ts';
 import { Input } from '@engine/core/input.ts';
 import { config } from '@engine/config.ts';
 import type { Vulnerable } from '@games/cheat-and-flee/vulnerable.ts';
 import type { InflictsDamage } from '@games/cheat-and-flee/inflictsDamage.ts';
+import { Bullet } from '@games/cheat-and-flee/bullets.ts';
+import { Rocket } from '@games/cheat-and-flee/rockets.ts';
+import { Nuke } from '@games/cheat-and-flee/nuke.ts';
+import { SpaceViper } from '@games/cheat-and-flee/spaceviper.ts';
+
+class Stages extends Entity {
+	stage: number = 0;
+	showStage: boolean = false;
+	color = config.theme.colors.red;
+
+	constructor() {
+		super(config.canvas_width / 2, config.canvas_height / 2, 0, 0);
+	}
+
+	increaseStage() {
+		this.stage += 1;
+		this.showStage = true;
+
+		setTimeout(() => {
+			this.showStage = false;
+		}, 4500);
+	}
+
+	render(r: Renderer) {
+		if (this.showStage) {
+			r.advancedText('STAGE ' + this.stage, this.x, this.y, this.color, {
+				textAlign: 'center',
+				textBaseline: 'middle',
+			});
+		}
+	}
+}
 
 class Timer extends Entity {
 	ms = 0;
@@ -43,9 +73,10 @@ class Timer extends Entity {
 				this.ms = 0;
 				this.counterRun = false;
 				this.color = config.theme.colors.dark_gray;
-				this.counterHitZero();
+				this.counterHitZero = true;
 				return;
 			}
+			this.color = config.theme.colors.white;
 
 			if (this.ms < 0) {
 				this.sec -= 1;
@@ -119,9 +150,7 @@ class Timer extends Entity {
 	stopCountdown() {
 		this.counterRun = false;
 	}
-	counterHitZero() {
-		console.log('counterHitZero!');
-	}
+	counterHitZero: boolean = false;
 
 	render(r: Renderer) {
 		r.advancedText(
@@ -141,151 +170,10 @@ class Timer extends Entity {
 	}
 }
 
-class Rocket extends Entity implements InflictsDamage {
-	color = config.theme.colors.red;
-	lifetime = 2000; // in milliseconds
-	speed = 250;
-
-	targetX = 0;
-	targetY = 0;
-
-	// direction to go
-	dirX = 0;
-	dirY = 0;
-
-	damage: number = 180;
-	explosion_size_multiplier = 2;
-
-	// NOTE: there's a lot of math here
-	// don't ask me to elaborate, it took me modeling, heavy thinking and plenty of frustration
-	constructor(
-		targetX: number,
-		targetY: number,
-		private inflictsDamage: Entity[],
-		offset_x: number,
-		offset_y: number,
-	) {
-		super(config.canvas_width / 2 + offset_x, 155 + offset_y, 10, 10);
-		this.speed = Math.floor(Math.random() * 250) + 150;
-		this.targetX = targetX;
-		this.targetY = targetY;
-
-		// define "delta x" and "delta y", aka. the direction to go
-		const dx = this.targetX - this.x;
-		const dy = this.targetY - this.y;
-
-		// define the hypotenuse
-		// "I wish I was high on potenuse"
-		const dist = Math.sqrt(dx * dx + dy * dy);
-
-		// proportional division to get the vector direction
-		// its just math, don't ask me
-		this.dirX = dx / dist;
-		this.dirY = dy / dist;
-	}
-
-	timer = 0;
-	update(delta: number) {
-		this.handleMovement(delta);
-
-		if (this.timer >= this.lifetime) {
-			for (let i = 0; i < this.inflictsDamage.length; i++) {
-				if (this.inflictsDamage[i] === this) {
-					this.inflictsDamage.splice(i, 1);
-					return;
-				}
-			}
-		}
-		this.timer += delta * 1000;
-	}
-
-	handleMovement(delta: number) {
-		this.x += this.dirX * this.speed * delta;
-		this.y += this.dirY * this.speed * delta;
-	}
-
-	collidesWith(other: (Entity & Vulnerable)): boolean {
-		return super.collidesWith(other);
-	}
-
-	render(r: Renderer) {
-		r.drawRect(this.x-this.w/2, this.y, this.w, this.h, this.color);
-	}
-}
-
-class Bullet extends Entity implements InflictsDamage {
-	color = config.theme.colors.yellow;
-	lifetime = 500; // in milliseconds
-	speed = 2000;
-
-	targetX = 0;
-	targetY = 0;
-
-	// direction to go
-	dirX = 0;
-	dirY = 0;
-
-	damage: number = 10;
-	explosion_size_multiplier: number = 5;
-
-	// NOTE: there's a lot of math here
-	// don't ask me to elaborate, it took me modeling, heavy thinking and plenty of frustration
-	constructor(
-		targetX: number,
-		targetY: number,
-		private inflictsDamage: (Entity & InflictsDamage)[],
-		offset_x: number,
-		offset_y: number,
-	) {
-		super(config.canvas_width / 2 + offset_x, 155 + offset_y, 2, 2);
-		this.speed = Math.floor(Math.random() * 500) + 200;
-		this.targetX = targetX;
-		this.targetY = targetY;
-
-		// define "delta x" and "delta y", aka. the direction to go
-		const dx = this.targetX - this.x;
-		const dy = this.targetY - this.y;
-
-		// define the hypotenuse
-		// "I wish I was high on potenuse"
-		const dist = Math.sqrt(dx * dx + dy * dy);
-
-		// proportional division to get the vector direction
-		// its just math, don't ask me
-		this.dirX = dx / dist;
-		this.dirY = dy / dist;
-	}
 
 
-	timer = 0;
-	update(delta: number) {
-		this.handleMovement(delta);
 
-		if (this.timer >= this.lifetime) {
-			for (let i = 0; i < this.inflictsDamage.length; i++) {
-				if (this.inflictsDamage[i] === this) {
-					this.inflictsDamage.splice(i, 1);
-					return;
-				}
-			}
-		}
-		this.timer += delta * 1000;
-	}
 
-	handleMovement(delta: number) {
-		this.x += this.dirX * this.speed * delta;
-		this.y += this.dirY * this.speed * delta;
-	}
-
-	collidesWith(other: (Entity & Vulnerable)): boolean {
-		return super.collidesWith(other);
-
-	}
-
-	render(r: Renderer) {
-		r.drawRect(this.x, this.y, this.w, this.h, this.color);
-	}
-}
 
 class Crosshair extends Entity {
 	color = config.theme.colors.green;
@@ -302,19 +190,14 @@ class Crosshair extends Entity {
 		super(config.canvas_width / 2, config.canvas_height / 2, 0, 0);
 
 		this.input.onKeyDown((key) => {
-			if (key === ' ') {
+
+			// TOGGLE FIRE
+			if (key === 't' || key === 'T') {
 				this.firing = !this.firing;
 				this.gamescene.mothership.muzzle_color = config.theme.colors.red;
 			}
 			if (!this.firing) {
 				this.gamescene.mothership.muzzle_color = config.theme.colors.black;
-			}
-
-			if (key === '1') {
-				this.mode = 0;
-			}
-			if (key === '2') {
-				this.mode = 1;
 			}
 		});
 	}
@@ -411,13 +294,41 @@ class Crosshair extends Entity {
 				textAlign: 'left',
 			});
 		}
+		if (this.mode === 2) {
+			r.drawRect(2, 2, 60, 15, config.theme.colors.purple);
+			r.advancedText('N U K E', 5, 10, config.theme.colors.white, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		}
 
+		if (this.firing) {
+			r.advancedText('T', (config.canvas_width/2)-4, 170, config.theme.colors.white, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		} else {
+			r.advancedText('M', (config.canvas_width/2)-4, 170, config.theme.colors.white, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		}
 	}
 
 	speed: number = 400;
 	update(delta: number) {
+		if (this.input.isDown('1')) {
+			this.mode = 0;
+		}
+		if (this.input.isDown('2')) {
+			this.mode = 1;
+		}
+		if (this.input.isDown('3')) {
+			this.mode = 2;
+		}
 		this.handleMovement(delta);
 		this.handleFire(delta);
+		this.handleManualFire(delta);
 	}
 
 	firerate = 650; // bullets/min
@@ -433,20 +344,43 @@ class Crosshair extends Entity {
 		this.timer += delta;
 	}
 
+	timer2 = 0;
+	handleManualFire(delta: number) {
+		// MANUAL FIRE
+		if (this.input.isDown(' ')) {
+			this.firing = false;
+			if (this.timer2 >= 60 / this.firerate) {
+				this.fire();
+				this.gamescene.mothership.muzzle_color = config.theme.colors.red;
+				setTimeout(() => {
+					this.gamescene.mothership.muzzle_color = config.theme.colors.black;
+				}, 20);
+				this.timer2 = 0;
+			}
+		}
+		this.timer2 += delta;
+	}
+
 	fire() {
 		if (this.mode === 0) {
 			this.firerate = 650;
-			// fire bullets
 			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 0, 0));
-			this.inflictsDamage.push(new Bullet(this.x + 10, this.y, this.inflictsDamage, 3, 5));
-			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, -3, 5));
-			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, 5, 5));
-			this.inflictsDamage.push(new Bullet(this.x - 10, this.y, this.inflictsDamage, 5, 5));
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 0, 2));
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 3, 5));
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, -3, 5));
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 5, 5));
+			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 5, 5));
 		}
 		if (this.mode === 1) {
 			this.firerate = 100;
 			this.inflictsDamage.push(new Rocket(this.x, this.y, this.inflictsDamage, 0, 0));
 		}
+		if (this.mode === 2) {
+			this.firerate = 50;
+			this.inflictsDamage.push(new Nuke(this.x, this.y, this.inflictsDamage, 0, 0));
+		}
+		// shows how many weapons are active at the current time
+		// console.log(this.inflictsDamage.length);
 	}
 
 	handleMovement(delta: number) {
@@ -517,28 +451,41 @@ class Crosshair extends Entity {
 }
 
 class ControlInfo extends Entity implements Vulnerable {
-	rect_color = config.theme.colors.gray;
+	rect_color = config.theme.colors.black;
 	text_color = config.theme.colors.dark_gray;
 	change: boolean = false;
 
 	HP: number = 1000;
 
-	constructor(private vulnerables: (Entity & Vulnerable)[]) {
-		super(config.canvas_width / 2 - 55, config.canvas_height / 2 - 25, 110, 50);
+	constructor(private vulnerables: (Entity & Vulnerable)[], private gamescene: GameScene) {
+		super(config.canvas_width / 2 - 55, config.canvas_height / 2 - 50, 115, 110);
 	}
 
 	takeDamage(damage: number): void {
 		if (this.HP < 0) {
+			const slow = 0;
+			let counter = 300; // how many iterations
 			for (let i = 0; i < this.vulnerables.length; ++i) {
 				if (this.vulnerables[i] === this) {
 					this.vulnerables.splice(i, 1);
+					this.gamescene.timer.startCountdown(0, 10, 0);
+					const slow = setInterval(() => {
+						if (counter <= 0) {
+							clearInterval(slow);
+						}
+						FarStar.min_speed -= 1;
+						FarStar.max_speed -= 2;
+						counter -= 1;
+
+					}, 10);
 					return;
 				}
+
 			}
 		}
 		this.rect_color = config.theme.colors.red;
 		setInterval(() => {
-			this.rect_color = config.theme.colors.gray;
+			this.rect_color = config.theme.colors.black;
 		}, 100);
 
 		this.HP -= damage;
@@ -551,30 +498,51 @@ class ControlInfo extends Entity implements Vulnerable {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('ARROW = MOVE', this.x + 2, this.y + 20, this.text_color, {
+		r.drawRect(this.x+5, this.y+20, 100, 2, this.text_color);
+
+		r.advancedText('ARROW = MOVE', this.x + 2, this.y + 30, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('SHIFT = SLOW', this.x + 2, this.y + 30, this.text_color, {
+		r.advancedText('SHIFT = SLOW', this.x + 2, this.y + 40, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('SPACE = FIRE', this.x + 2, this.y + 40, this.text_color, {
+		r.advancedText('SPACE = MANUAL', this.x + 2, this.y + 50, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
+		r.advancedText('T = TOGGLE', this.x + 2, this.y + 60, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+		r.drawRect(this.x + 5, this.y + 70, 100, 2, this.text_color);
+
+		r.advancedText('1 = BULLETS', this.x + 2, this.y + 80, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+		r.advancedText('2 = ROCKETS', this.x + 2, this.y + 90, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+		r.advancedText('3 = NUKE', this.x + 2, this.y + 100, this.text_color, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+
 
 	}
 
 	elapsed = 0;
 	counter = 0;
 	update(delta: number) {
-		if (this.counter <= 50) {
+		if (this.counter <= 15) {
 			if (this.elapsed >= 0.1) {
 				if (this.change) {
 					this.text_color = config.theme.colors.gray;
 				} else {
-					this.text_color = config.theme.colors.dark_gray;
+					this.text_color = config.theme.colors.dark_green;
 				}
 				this.change = !this.change;
 				this.elapsed = 0;
@@ -609,11 +577,13 @@ class FarStar extends Entity {
 	private speed: number;
 	private color = config.theme.colors.white;
 
-	static readonly min_size: number = 1;
-	static readonly max_size: number = 3;
+	static min_size: number = 1;
+	static max_size: number = 3;
 
-	static readonly min_speed: number = 50;
-	static readonly max_speed: number = 200;
+
+	// default: 350, 800
+	static min_speed: number = 350;
+	static max_speed: number = 800;
 
 	constructor() {
 		super(Math.floor(Math.random() * config.canvas_width), -30, 0, 0);
@@ -622,17 +592,21 @@ class FarStar extends Entity {
 	}
 
 	update(delta: number) {
-		if (this.y >= config.canvas_height + 10) {
-			this.y = -30;
+		if (this.y >= config.canvas_height + 50) {
+			this.y = -50;
 			this.x = Math.floor(Math.random() * config.canvas_width);
 			this.size = Math.floor(Math.random() * FarStar.max_size) + FarStar.min_size;
 			this.speed = Math.floor(Math.random() * FarStar.max_speed) + FarStar.min_speed;
 
 			// Meteorites
-			if ((Math.floor(Math.random() * 20) + 1) === 5) {
+			if (Math.floor(Math.random() * 20) + 1 === 5) {
 				this.size = Math.floor(Math.random() * 5) + 1;
-				this.speed = 500;
-				this.color = config.theme.colors.yellow;
+				this.speed = FarStar.max_speed * 3;
+				this.color = config.theme.colors.gray;
+			} else if (Math.floor(Math.random() * 100) + 1 === 50) {
+				this.size = Math.floor(Math.random() * 8) + 1;
+				this.speed = FarStar.min_speed/2;
+				this.color = config.theme.colors.black;
 			} else {
 				this.color = config.theme.colors.white;
 			}
@@ -645,6 +619,8 @@ class FarStar extends Entity {
 		r.drawRect(this.x, this.y, this.size, this.size, this.color);
 	}
 }
+
+
 
 type GameState = 'start' | 'running' | 'pause' | 'end';
 class GameScene extends Scene {
@@ -663,24 +639,28 @@ class GameScene extends Scene {
 	crosshair: Crosshair = new Crosshair(this.inflictsDamage, this);
 	timer: Timer = new Timer();
 	mothership: Mothership = new Mothership();
-	controlinfo: ControlInfo = new ControlInfo(this.vulnerables);
+	controlinfo: ControlInfo = new ControlInfo(this.vulnerables, this);
+	stages: Stages = new Stages();
 
 	constructor() {
 		super();
 
 		this.entities.push(this.timer);
-		this.entities.push(this.crosshair);
 		this.entities.push(this.mothership);
+		this.entities.push(this.crosshair);
 		this.vulnerables.push(this.controlinfo);
+		this.entities.push(this.stages);
 
-		const n = 30; // amount of stars (default 15)
+		const n = 50; // amount of stars (default 15)
 		for (let i = 0; i < n; i++) {
 			this.stars.push(new FarStar());
 		}
 
 		this.handleInput();
 	}
-
+	timer2 = 0;
+	round_start: boolean = true;
+	system_mode = 0; // 0 = inactive, 1 = passive, 2 = active
 	update(dt: number) {
 		if (this.gamestate === 'running') {
 			for (const e of this.entities) {
@@ -695,14 +675,46 @@ class GameScene extends Scene {
 			for (const e of this.vulnerables) {
 				e.update(dt);
 			}
+
+			if (this.timer.counterHitZero) {
+				if (this.round_start) {
+					this.spawnIntervalId = null;
+					this.system_mode = 1;
+					this.timer.startCountdown(0, 5, 0);
+					console.log('======== NEW STAGE ========');
+					this.stages.increaseStage();
+					this.vulnerables.length = 0;
+				} else {
+					this.system_mode = 2;
+					this.timer.startCountdown(0, 30, 0);
+					this.handleVipers();
+					this.rows_of_vipers += 0.5;
+				}
+				this.round_start = !this.round_start;
+				this.timer.counterHitZero = false;
+			}
+			this.handleCollisions();
 		}
-
-		this.handleCollisions();
 	}
 
-	isVulnerable(entity: Entity): entity is Entity & Vulnerable {
-		return 'HP' in entity;
+	n_vipers = 6;
+	rows_of_vipers = 10;
+	private spawnIntervalId: ReturnType<typeof setInterval> | null = null;
+	handleVipers() {
+
+		this.spawnIntervalId = setInterval(() => {
+			const random_x_area = Math.floor(Math.random() * 200) + 40;
+			for (let i = 0; i < this.rows_of_vipers; i++) {
+				for (let j = 0; j < this.n_vipers; j++) {
+					const offset_x = Math.floor(Math.random() * 40) + 1;
+					const offset_y = Math.floor(Math.random() * 40) + 1;
+					this.vulnerables.push(new SpaceViper(random_x_area, this.vulnerables, offset_x, offset_y),);
+				}
+			}
+			console.log('spawning Vipers');
+		}, 3000);
 	}
+
 	handleCollisions() {
 		for (let i = 0; i < this.vulnerables.length; i++) {
 			for (let j = 0; j < this.inflictsDamage.length; j++) {
@@ -734,6 +746,26 @@ class GameScene extends Scene {
 		}
 		for (const e of this.vulnerables) {
 			e.render(r);
+		}
+		r.advancedText('SYSTEM:', 10, 160, config.theme.colors.white, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
+		if (this.system_mode === 0) {
+			r.advancedText('[inactive]', 10, 170, config.theme.colors.gray, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		} else if (this.system_mode === 1) {
+			r.advancedText('[passive]', 10, 170, config.theme.colors.dark_yellow, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
+		} else if (this.system_mode === 2) {
+			r.advancedText('[active]', 10, 170, config.theme.colors.green, {
+				textBaseline: 'middle',
+				textAlign: 'left',
+			});
 		}
 	}
 
