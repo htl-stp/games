@@ -7,11 +7,11 @@ import  { type Renderer } from '@engine/core/renderer.ts';
 import { Input } from '@engine/core/input.ts';
 import { config } from '@engine/config.ts';
 import type { Vulnerable } from '@games/cheat-and-flee/vulnerable.ts';
-import type { InflictsDamage } from '@games/cheat-and-flee/inflictsDamage.ts';
-import { Bullet } from '@games/cheat-and-flee/bullets.ts';
-import { Rocket } from '@games/cheat-and-flee/rockets.ts';
-import { Nuke } from '@games/cheat-and-flee/nuke.ts';
 import { SpaceViper } from '@games/cheat-and-flee/spaceviper.ts';
+import { Bullet } from '@games/cheat-and-flee/weapons/bullets.ts';
+import { Rocket } from '@games/cheat-and-flee/weapons/rockets.ts';
+import { Nuke } from '@games/cheat-and-flee/weapons/nuke.ts';
+import type { Projectile } from '@games/cheat-and-flee/projectile.ts';
 
 class Stages extends Entity {
 	stage: number = 0;
@@ -175,29 +175,27 @@ class Timer extends Entity {
 
 
 
-class Crosshair extends Entity {
+export class Crosshair extends Entity {
 	color = config.theme.colors.green;
 	input: Input = new Input();
 
 	// 0 = bullets, 1 = rockets, ...
 	mode: number = 0;
 
-	firing: boolean = false;
-	constructor(
-		private inflictsDamage: (Entity & InflictsDamage)[],
-		private gamescene: GameScene,
-	) {
+	autofire: boolean = false;
+	constructor(private gamescene: GameScene) {
 		super(config.canvas_width / 2, config.canvas_height / 2, 0, 0);
 
 		this.input.onKeyDown((key) => {
-
-			// TOGGLE FIRE
+			// TOGGLE FIRE, semi - auto
 			if (key === 't' || key === 'T') {
-				this.firing = !this.firing;
+				this.autofire = !this.autofire;
 				this.gamescene.mothership.muzzle_color = config.theme.colors.red;
+				this.fire_mode = 'A';
 			}
-			if (!this.firing) {
+			if (!this.autofire) {
 				this.gamescene.mothership.muzzle_color = config.theme.colors.black;
+				this.fire_mode = 'M';
 			}
 		});
 	}
@@ -207,6 +205,11 @@ class Crosshair extends Entity {
 	crosshair_gap = 4; // default 4
 	crosshair_thickness = 2; // default 2
 	crosshair_length = 10; // default 10
+
+	weapon_load_1 = 60;
+	weapon_load_2 = 60;
+	weapon_load_3 = 60;
+	fire_mode = 'M';
 	render(r: Renderer) {
 		// center dot
 		// r.drawRect(this.x, this.y, this.crosshair_thickness, this.crosshair_thickness, this.color);
@@ -280,7 +283,7 @@ class Crosshair extends Entity {
 
 		// weapon symbols
 		if (this.mode === 0) {
-			r.drawRect(2, 2, 60, 15, config.theme.colors.black);
+			r.drawRect(2, 2, this.weapon_load_1, 15, config.theme.colors.dark_gray);
 			r.advancedText('BULLETS', 5, 10, config.theme.colors.yellow, {
 				textBaseline: 'middle',
 				textAlign: 'left',
@@ -288,99 +291,137 @@ class Crosshair extends Entity {
 		}
 		// weapon symbols
 		if (this.mode === 1) {
-			r.drawRect(2, 2, 60, 15, config.theme.colors.dark_red);
+			r.drawRect(2, 2, this.weapon_load_2, 15, config.theme.colors.dark_red);
 			r.advancedText('ROCKETS', 5, 10, config.theme.colors.yellow, {
 				textBaseline: 'middle',
 				textAlign: 'left',
 			});
 		}
 		if (this.mode === 2) {
-			r.drawRect(2, 2, 60, 15, config.theme.colors.purple);
+			r.drawRect(2, 2, this.weapon_load_3, 15, config.theme.colors.purple);
 			r.advancedText('N U K E', 5, 10, config.theme.colors.white, {
 				textBaseline: 'middle',
 				textAlign: 'left',
 			});
 		}
 
-		if (this.firing) {
-			r.advancedText('T', (config.canvas_width/2)-4, 170, config.theme.colors.white, {
-				textBaseline: 'middle',
-				textAlign: 'left',
-			});
-		} else {
-			r.advancedText('M', (config.canvas_width/2)-4, 170, config.theme.colors.white, {
-				textBaseline: 'middle',
-				textAlign: 'left',
-			});
-		}
+		r.advancedText(this.fire_mode, config.canvas_width / 2 - 4, 170, config.theme.colors.white, {
+			textBaseline: 'middle',
+			textAlign: 'left',
+		});
 	}
 
 	speed: number = 400;
 	update(delta: number) {
-		if (this.input.isDown('1')) {
+		if (this.input.isDown('1') || this.input.isDown('!')) {
 			this.mode = 0;
+			this.firerate = 650;
 		}
-		if (this.input.isDown('2')) {
+		if (this.input.isDown('2') || this.input.isDown('"')) {
 			this.mode = 1;
+			this.firerate = 100;
 		}
-		if (this.input.isDown('3')) {
+		if (this.input.isDown('3') || this.input.isDown('§')) {
 			this.mode = 2;
+			this.firerate = 10;
 		}
+
+		if (this.weapon_load_1 < 60) {
+			this.weapon_load_1 += delta * 650;
+		}
+		if (this.weapon_load_2 < 60) {
+			this.weapon_load_2 += delta * 50;
+		}
+		if (this.weapon_load_3 < 60) {
+			this.weapon_load_3 += delta * 10;
+		}
+
 		this.handleMovement(delta);
-		this.handleFire(delta);
-		this.handleManualFire(delta);
+		this.handleFire();
+		this.handleManualFire();
+
+		this.timer1 += delta * 650;
+		this.timer2 += delta * 50;
+		this.timer3 += delta * 10;
+
+		console.log('===');
+		console.log(this.timer1);
+		console.log(this.timer2);
+		console.log(this.timer3);
+
 	}
 
 	firerate = 650; // bullets/min
-	timer = 0;
+
+	timer1 = 100;
+	timer2 = 100;
+	timer3 = 100;
+
 	// toggle system
-	handleFire(delta: number) {
-		if (this.firing) {
-			if (this.timer >= 60 / this.firerate) {
-				this.fire();
-				this.timer = 0;
-			}
+	handleFire() {
+		if (this.autofire) {
+			this.fire();
 		}
-		this.timer += delta;
 	}
 
-	timer2 = 0;
-	handleManualFire(delta: number) {
+	handleManualFire() {
 		// MANUAL FIRE
 		if (this.input.isDown(' ')) {
-			this.firing = false;
-			if (this.timer2 >= 60 / this.firerate) {
-				this.fire();
-				this.gamescene.mothership.muzzle_color = config.theme.colors.red;
-				setTimeout(() => {
-					this.gamescene.mothership.muzzle_color = config.theme.colors.black;
-				}, 20);
-				this.timer2 = 0;
-			}
+			this.autofire = false;
+			this.fire();
+			this.gamescene.mothership.muzzle_color = config.theme.colors.red;
+			setTimeout(() => {
+				this.gamescene.mothership.muzzle_color = config.theme.colors.black;
+			}, 20);
 		}
-		this.timer2 += delta;
 	}
 
 	fire() {
-		if (this.mode === 0) {
-			this.firerate = 650;
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 0, 0));
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 0, 2));
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 3, 5));
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, -3, 5));
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 5, 5));
-			this.inflictsDamage.push(new Bullet(this.x, this.y, this.inflictsDamage, 5, 5));
+		if (this.mode === 0 && this.timer1 >= 60) {
+			this.weapon_load_1 = 0;
+			this.timer1 = 0;
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 5, 0, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, -5, 0, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 5, 2, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, -5, 2, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 0, 2, NaN, NaN, NaN, NaN, NaN),
+			);
+
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 5, 0, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, -5, 0, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 5, 2, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, -5, 2, NaN, NaN, NaN, NaN, NaN),
+			);
+			this.gamescene.weapons.push(
+				new Bullet(this.x, this.y, this.gamescene, 0, 2, NaN, NaN, NaN, NaN, NaN),
+			);
 		}
-		if (this.mode === 1) {
-			this.firerate = 100;
-			this.inflictsDamage.push(new Rocket(this.x, this.y, this.inflictsDamage, 0, 0));
+		if (this.mode === 1 && this.timer2 >= 60) {
+			this.weapon_load_2 = 0;
+			this.timer2 = 0;
+			this.gamescene.weapons.push(new Rocket(this.x, this.y, this.gamescene, 0, 0));
 		}
-		if (this.mode === 2) {
-			this.firerate = 50;
-			this.inflictsDamage.push(new Nuke(this.x, this.y, this.inflictsDamage, 0, 0));
+		if (this.mode === 2 && this.timer3 >= 60) {
+			this.weapon_load_3 = 0;
+			this.timer3 = 0;
+			this.gamescene.weapons.push(new Nuke(this.x, this.y, this.gamescene, 0, 0));
 		}
-		// shows how many weapons are active at the current time
-		// console.log(this.inflictsDamage.length);
 	}
 
 	handleMovement(delta: number) {
@@ -457,17 +498,19 @@ class ControlInfo extends Entity implements Vulnerable {
 
 	HP: number = 1000;
 
-	constructor(private vulnerables: (Entity & Vulnerable)[], private gamescene: GameScene) {
+	constructor(private gamescene: GameScene) {
 		super(config.canvas_width / 2 - 55, config.canvas_height / 2 - 50, 115, 110);
 	}
+	dead: boolean = false;
 
 	takeDamage(damage: number): void {
-		if (this.HP < 0) {
+		this.HP -= damage;
+		if (this.HP <= 0) {
 			const slow = 0;
 			let counter = 300; // how many iterations
-			for (let i = 0; i < this.vulnerables.length; ++i) {
-				if (this.vulnerables[i] === this) {
-					this.vulnerables.splice(i, 1);
+			for (let i = 0; i < this.gamescene.vulnerables.length; ++i) {
+				if (this.gamescene.vulnerables[i] === this) {
+					this.gamescene.vulnerables.splice(i, 1);
 					this.gamescene.timer.startCountdown(0, 10, 0);
 					const slow = setInterval(() => {
 						if (counter <= 0) {
@@ -476,19 +519,15 @@ class ControlInfo extends Entity implements Vulnerable {
 						FarStar.min_speed -= 1;
 						FarStar.max_speed -= 2;
 						counter -= 1;
-
 					}, 10);
 					return;
 				}
-
 			}
 		}
 		this.rect_color = config.theme.colors.red;
 		setInterval(() => {
 			this.rect_color = config.theme.colors.black;
 		}, 100);
-
-		this.HP -= damage;
 	}
 
 	render(r: Renderer) {
@@ -498,7 +537,7 @@ class ControlInfo extends Entity implements Vulnerable {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.drawRect(this.x+5, this.y+20, 100, 2, this.text_color);
+		r.drawRect(this.x + 5, this.y + 20, 100, 2, this.text_color);
 
 		r.advancedText('ARROW = MOVE', this.x + 2, this.y + 30, this.text_color, {
 			textBaseline: 'middle',
@@ -508,11 +547,11 @@ class ControlInfo extends Entity implements Vulnerable {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('SPACE = MANUAL', this.x + 2, this.y + 50, this.text_color, {
+		r.advancedText('SPACE = FIRE', this.x + 2, this.y + 50, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-		r.advancedText('T = TOGGLE', this.x + 2, this.y + 60, this.text_color, {
+		r.advancedText('T = AUTO FIRE', this.x + 2, this.y + 60, this.text_color, {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
@@ -530,8 +569,6 @@ class ControlInfo extends Entity implements Vulnerable {
 			textBaseline: 'middle',
 			textAlign: 'left',
 		});
-
-
 	}
 
 	elapsed = 0;
@@ -623,12 +660,12 @@ class FarStar extends Entity {
 
 
 type GameState = 'start' | 'running' | 'pause' | 'end';
-class GameScene extends Scene {
+export class GameScene extends Scene {
 	entities: Entity[] = [];
 	stars: Entity[] = [];
 
 	// weapons
-	inflictsDamage: (Entity & InflictsDamage)[] = [];
+	weapons: (Entity & Projectile)[] = [];
 
 	// targets
 	vulnerables: (Entity & Vulnerable)[] = [];
@@ -636,10 +673,10 @@ class GameScene extends Scene {
 	input: Input = new Input();
 	private gamestate: GameState = 'running';
 
-	crosshair: Crosshair = new Crosshair(this.inflictsDamage, this);
+	crosshair: Crosshair = new Crosshair(this);
 	timer: Timer = new Timer();
 	mothership: Mothership = new Mothership();
-	controlinfo: ControlInfo = new ControlInfo(this.vulnerables, this);
+	controlinfo: ControlInfo = new ControlInfo(this);
 	stages: Stages = new Stages();
 
 	constructor() {
@@ -661,6 +698,7 @@ class GameScene extends Scene {
 	timer2 = 0;
 	round_start: boolean = true;
 	system_mode = 0; // 0 = inactive, 1 = passive, 2 = active
+
 	update(dt: number) {
 		if (this.gamestate === 'running') {
 			for (const e of this.entities) {
@@ -669,7 +707,7 @@ class GameScene extends Scene {
 			for (const e of this.stars) {
 				e.update(dt);
 			}
-			for (const e of this.inflictsDamage) {
+			for (const e of this.weapons) {
 				e.update(dt);
 			}
 			for (const e of this.vulnerables) {
@@ -678,12 +716,18 @@ class GameScene extends Scene {
 
 			if (this.timer.counterHitZero) {
 				if (this.round_start) {
-					this.spawnIntervalId = null;
 					this.system_mode = 1;
 					this.timer.startCountdown(0, 5, 0);
 					console.log('======== NEW STAGE ========');
 					this.stages.increaseStage();
 					this.vulnerables.length = 0;
+					if (this.spawnIntervalId !== null) {
+						clearInterval(this.spawnIntervalId);
+						this.spawnIntervalId = null;
+					}
+					if (this.delay >= 800) {
+						this.delay -= 15;
+					}
 				} else {
 					this.system_mode = 2;
 					this.timer.startCountdown(0, 30, 0);
@@ -699,38 +743,23 @@ class GameScene extends Scene {
 
 	n_vipers = 6;
 	rows_of_vipers = 10;
+	delay = 3000;
 	private spawnIntervalId: ReturnType<typeof setInterval> | null = null;
 	handleVipers() {
-
 		this.spawnIntervalId = setInterval(() => {
 			const random_x_area = Math.floor(Math.random() * 200) + 40;
 			for (let i = 0; i < this.rows_of_vipers; i++) {
 				for (let j = 0; j < this.n_vipers; j++) {
 					const offset_x = Math.floor(Math.random() * 40) + 1;
 					const offset_y = Math.floor(Math.random() * 40) + 1;
-					this.vulnerables.push(new SpaceViper(random_x_area, this.vulnerables, offset_x, offset_y),);
+					this.vulnerables.push(
+						new SpaceViper(random_x_area, offset_x, offset_y, this),
+					);
 				}
 			}
-			console.log('spawning Vipers');
-		}, 3000);
+		}, this.delay);
 	}
-
-	handleCollisions() {
-		for (let i = 0; i < this.vulnerables.length; i++) {
-			for (let j = 0; j < this.inflictsDamage.length; j++) {
-				if (this.inflictsDamage[j].collidesWith(this.vulnerables[i])) {
-					this.inflictsDamage[j].color = config.theme.colors.white;
-					this.inflictsDamage[j].w *= this.inflictsDamage[j].explosion_size_multiplier;
-					this.inflictsDamage[j].h *= this.inflictsDamage[j].explosion_size_multiplier;
-
-					this.vulnerables[i].takeDamage(this.inflictsDamage[j].damage);
-					setTimeout(() => {
-						this.inflictsDamage.splice(j, 1);
-					});
-					return;
-				}
-			}
-		}
+	handleCollisions(): void {
 	}
 
 	render(r: Renderer) {
@@ -741,7 +770,7 @@ class GameScene extends Scene {
 		for (const e of this.entities) {
 			e.render(r);
 		}
-		for (const e of this.inflictsDamage) {
+		for (const e of this.weapons) {
 			e.render(r);
 		}
 		for (const e of this.vulnerables) {
