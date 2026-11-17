@@ -13,6 +13,8 @@ export class SpaceViper extends Entity implements Vulnerable {
 
 	HP: number = 20;
 
+	circling: boolean = false;
+
 	// the mothership
 	targetX = config.canvas_width / 2;
 	targetY = 165;
@@ -30,6 +32,9 @@ export class SpaceViper extends Entity implements Vulnerable {
 
 		this.dirX = dx / dy;
 		this.dirY = -1 * Math.random();
+
+		this.circling = Math.random() > 0.5;
+
 	}
 
 	render(r: Renderer) {
@@ -41,8 +46,13 @@ export class SpaceViper extends Entity implements Vulnerable {
 	}
 
 	handleMovement(delta: number) {
-		this.x += this.dirX * this.speed * delta;
-		this.y -= this.dirY * this.speed * delta;
+		if (this.circling){
+			this.x += this.dirX * this.speed * delta * Math.PI;
+			this.y -= this.dirY * this.speed * delta;
+		} else {
+			this.x += this.dirX * this.speed * delta;
+			this.y -= this.dirY * this.speed * delta;
+		}
 	}
 
 	takeDamage(damage: number): void {
