@@ -1,7 +1,7 @@
 import { Entity } from '@engine/entity/entity.ts';
 import { config } from '@engine/config.ts';
 import type { Vulnerable } from '@games/cheat-and-flee/vulnerable.ts';
-import  { type Renderer } from '@engine/core/renderer.ts';
+import { type Renderer } from '@engine/core/renderer.ts';
 import type { GameScene } from '@games/cheat-and-flee/game.ts';
 import type { Projectile } from '@games/cheat-and-flee/projectile.ts';
 import { Bullet } from '@games/cheat-and-flee/weapons/bullets.ts';

@@ -3,7 +3,7 @@ import { MenuScene } from '@engine/scenes/menuScene.ts';
 import type { AssetLoader } from '@engine/assets/assetloader.ts';
 import { Scene } from '@engine/scenes/scene.ts';
 import { Entity } from '@engine/entity/entity.ts';
-import  { type Renderer } from '@engine/core/renderer.ts';
+import { type Renderer } from '@engine/core/renderer.ts';
 import { Input } from '@engine/core/input.ts';
 import { config } from '@engine/config.ts';
 import type { Vulnerable } from '@games/cheat-and-flee/vulnerable.ts';
@@ -172,11 +172,6 @@ class Timer extends Entity {
 	}
 }
 
-
-
-
-
-
 export class Crosshair extends Entity {
 	color = config.theme.colors.green;
 	input: Input = new Input();
@@ -318,7 +313,6 @@ export class Crosshair extends Entity {
 		r.drawRect(2, 18, this.weapon_load_2, 2, config.theme.colors.red);
 		r.drawRect(2, 20, this.weapon_load_3, 2, config.theme.colors.green);
 		r.drawRect(2, 22, this.weapon_load_4, 2, config.theme.colors.blue);
-
 
 		r.advancedText(
 			this.fire_mode,
@@ -665,7 +659,6 @@ class ControlInfo extends Entity implements Vulnerable {
 	takeDamage(damage: number): void {
 		this.HP -= damage;
 		if (this.HP <= 0) {
-			const slow = 0;
 			let counter = 550; // how many iterations
 			for (let i = 0; i < this.gamescene.vulnerables.length; ++i) {
 				if (this.gamescene.vulnerables[i] === this) {
@@ -762,27 +755,21 @@ class Mothership extends Entity {
 
 	render(r: Renderer) {
 		r.drawRect(
-			this.x - this.w/2,
-			this.y + this.h/2,
+			this.x - this.w / 2,
+			this.y + this.h / 2,
 			this.w * 2,
 			this.h * 2,
 			config.theme.colors.gray,
 		);
 		r.drawRect(
-			this.x - this.w / 2 + this.w*0.2,
-			this.y + this.h / 2 + this.h*0.2,
+			this.x - this.w / 2 + this.w * 0.2,
+			this.y + this.h / 2 + this.h * 0.2,
 			this.w * 2 * 0.8,
 			this.h * 2 * 0.8,
 			config.theme.colors.black,
 		);
 		r.drawRect(this.x, this.y, this.w, this.h, config.theme.colors.gray);
-		r.drawRect(
-			this.x + this.w * 0.25,
-			this.y,
-			this.w * 0.5,
-			this.h * 0.5,
-			this.muzzle_color,
-		);
+		r.drawRect(this.x + this.w * 0.25, this.y, this.w * 0.5, this.h * 0.5, this.muzzle_color);
 	}
 }
 
@@ -793,7 +780,6 @@ class FarStar extends Entity {
 
 	static min_size: number = 1;
 	static max_size: number = 3;
-
 
 	// default: 350, 800
 	static min_speed: number = 350;
@@ -819,7 +805,7 @@ class FarStar extends Entity {
 				this.color = config.theme.colors.gray;
 			} else if (Math.floor(Math.random() * 100) + 1 === 50) {
 				this.size = Math.floor(Math.random() * 8) + 1;
-				this.speed = FarStar.min_speed/2;
+				this.speed = FarStar.min_speed / 2;
 				this.color = config.theme.colors.black;
 			} else {
 				this.color = config.theme.colors.white;
@@ -833,8 +819,6 @@ class FarStar extends Entity {
 		r.drawRect(this.x, this.y, this.size, this.size, this.color);
 	}
 }
-
-
 
 type GameState = 'start' | 'running' | 'pause' | 'end';
 export class GameScene extends Scene {
@@ -874,23 +858,22 @@ export class GameScene extends Scene {
 	}
 	round_start: boolean = true;
 
-
 	// change this value and the speed of the entire game changes too, default 1
 	speed_multiplier = 1;
 	cap: number = 1000; // how many vulnerables at once allowed in player area
 	update(dt: number) {
 		if (this.gamestate === 'running') {
 			for (const e of this.entities) {
-				e.update(dt*this.speed_multiplier);
+				e.update(dt * this.speed_multiplier);
 			}
 			for (const e of this.stars) {
-				e.update(dt*this.speed_multiplier);
+				e.update(dt * this.speed_multiplier);
 			}
 			for (const e of this.weapons) {
-				e.update(dt*this.speed_multiplier);
+				e.update(dt * this.speed_multiplier);
 			}
 			for (const e of this.vulnerables) {
-				e.update(dt*this.speed_multiplier);
+				e.update(dt * this.speed_multiplier);
 			}
 
 			if (this.timer.counterHitZero) {
@@ -926,7 +909,6 @@ export class GameScene extends Scene {
 							FarStar.max_speed += 10;
 						});
 					}
-
 				}
 				this.round_start = !this.round_start;
 				this.timer.counterHitZero = false;
@@ -945,7 +927,6 @@ export class GameScene extends Scene {
 	delay = 500;
 	private spawnIntervalId: ReturnType<typeof setInterval> | null = null;
 	handleEnemies() {
-
 		this.spawnIntervalId = setInterval(() => {
 			const random_x_area = Math.floor(Math.random() * 200) + 40;
 			for (let i = 0; i < this.rows_of_vipers; i++) {
@@ -965,8 +946,7 @@ export class GameScene extends Scene {
 			}
 		}, this.delay);
 	}
-	handleCollisions(): void {
-	}
+	handleCollisions(): void {}
 
 	render(r: Renderer) {
 		super.render(r);
@@ -982,10 +962,16 @@ export class GameScene extends Scene {
 		for (const e of this.vulnerables) {
 			e.render(r);
 		}
-		r.advancedText('RADAR:' + '['+ this.vulnerables.length +']', 10, 170, config.theme.colors.dark_gray, {
-			textBaseline: 'middle',
-			textAlign: 'left',
-		});
+		r.advancedText(
+			'RADAR:' + '[' + this.vulnerables.length + ']',
+			10,
+			170,
+			config.theme.colors.dark_gray,
+			{
+				textBaseline: 'middle',
+				textAlign: 'left',
+			},
+		);
 	}
 
 	handleInput() {}

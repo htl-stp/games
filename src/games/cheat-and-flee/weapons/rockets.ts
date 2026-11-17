@@ -71,7 +71,8 @@ export class Rocket extends Entity implements Projectile {
 				this.gamescene.weapons.splice(i, 1);
 				return;
 			}
-		}	}
+		}
+	}
 
 	explode(): void {
 		// send out shrapnel in all directions
@@ -82,7 +83,9 @@ export class Rocket extends Entity implements Projectile {
 			const theta = (2 * Math.PI * i) / amount_of_bullets;
 			const x = this.x * radius * Math.cos(theta);
 			const y = this.y * radius * Math.sin(theta);
-			this.gamescene.weapons.push(new Bullet(x,y,this.gamescene, 0,0, this.x, this.y, 300, 100, this.damage*0.8));
+			this.gamescene.weapons.push(
+				new Bullet(x, y, this.gamescene, 0, 0, this.x, this.y, 300, 100, this.damage * 0.8),
+			);
 		}
 
 		setTimeout(() => {
@@ -91,7 +94,18 @@ export class Rocket extends Entity implements Projectile {
 				const x = this.x * radius * Math.cos(theta);
 				const y = this.y * radius * Math.sin(theta);
 				this.gamescene.weapons.push(
-					new Bullet(x, y, this.gamescene, 0, 0, this.x, this.y, 300, 150, this.damage * 0.2),
+					new Bullet(
+						x,
+						y,
+						this.gamescene,
+						0,
+						0,
+						this.x,
+						this.y,
+						300,
+						150,
+						this.damage * 0.2,
+					),
 				);
 			}
 		}, 100);

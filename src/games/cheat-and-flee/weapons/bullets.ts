@@ -39,7 +39,7 @@ export class Bullet extends Entity implements Projectile {
 		private lifetime_optional: number,
 		private damage_optional: number,
 	) {
-		if (Number.isNaN(x_origin_optional)|| Number.isNaN(y_origin_optional)) {
+		if (Number.isNaN(x_origin_optional) || Number.isNaN(y_origin_optional)) {
 			super(config.canvas_width / 2 + offset_x, 155 + offset_y, 2, 2);
 		} else {
 			super(x_origin_optional + offset_x, y_origin_optional + offset_y, 2, 2);
@@ -51,14 +51,12 @@ export class Bullet extends Entity implements Projectile {
 			this.speed = speed_optional;
 		}
 
-		if (!(Number.isNaN(lifetime_optional))) {
+		if (!Number.isNaN(lifetime_optional)) {
 			this.lifetime = lifetime_optional;
 		}
 		if (!Number.isNaN(damage_optional)) {
 			this.damage = damage_optional;
 		}
-
-
 
 		// random offset
 		this.targetX = targetX + (Math.floor(Math.random() * this.accuracy * 2) - this.accuracy);

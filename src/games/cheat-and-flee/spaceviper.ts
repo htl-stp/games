@@ -34,7 +34,6 @@ export class SpaceViper extends Entity implements Vulnerable {
 		this.dirY = -1 * Math.random();
 
 		this.circling = Math.random() > 0.5;
-
 	}
 
 	render(r: Renderer) {
@@ -46,7 +45,7 @@ export class SpaceViper extends Entity implements Vulnerable {
 	}
 
 	handleMovement(delta: number) {
-		if (this.circling){
+		if (this.circling) {
 			this.x += this.dirX * this.speed * delta * Math.PI;
 			this.y -= this.dirY * this.speed * delta;
 		} else {

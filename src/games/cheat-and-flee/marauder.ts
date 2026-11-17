@@ -23,7 +23,7 @@ export class Marauder extends Entity implements Vulnerable {
 		offset_y: number,
 		private gamescene: GameScene,
 	) {
-		super(x + offset_x, -60 + offset_y, 15,  15);
+		super(x + offset_x, -60 + offset_y, 15, 15);
 
 		const dx = this.targetX - this.x;
 		const dy = this.targetY - this.y;
